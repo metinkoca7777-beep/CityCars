@@ -51,11 +51,6 @@ export const MODEL_CREDITS = [
   "url": "https://sketchfab.com/3d-models/8b328f623677468d9fc97180de97cfe5"
  },
  {
-  "title": "Galata Kulesi",
-  "author": "bar0nline",
-  "url": "https://sketchfab.com/3d-models/80590fdc113240c7b85d2d873fc5385a"
- },
- {
   "title": "Kız Kulesi",
   "author": "bar0nline",
   "url": "https://sketchfab.com/3d-models/1d186da8db924d2da604eb489ce0a869"
@@ -71,11 +66,6 @@ export const MODEL_CREDITS = [
   "url": "https://sketchfab.com/3d-models/7be6145f685f47a3a61ee3f19298cadd"
  },
  {
-  "title": "Statue Of Liberty",
-  "author": "gravityjack",
-  "url": "https://sketchfab.com/3d-models/84094e8d5e724b5c882cf576ca12e44e"
- },
- {
   "title": "Japanese Torii Gate",
   "author": "sahirvirmani",
   "url": "https://sketchfab.com/3d-models/2027a248de1b4b70985ff97e708fb50d"
@@ -89,5 +79,35 @@ export const MODEL_CREDITS = [
   "title": "Windmill Stylized",
   "author": "a_l_e_x_a_n_d_e_r",
   "url": "https://sketchfab.com/3d-models/a7780e3667954bbf97bb619cb8a3e272"
+ },
+ {
+  "title": "Mini Galata Tower-2",
+  "author": "ErtugrulAydin",
+  "url": "https://sketchfab.com/3d-models/0780a7e5369442c3967681084a046588"
+ },
+ {
+  "title": "Notre Dame Cathedral  (Work in progress)",
+  "author": "RaizVR",
+  "url": "https://sketchfab.com/3d-models/d1a0f65c217740ec800021b6771964f1"
+ },
+ {
+  "title": "Sydney Opera House",
+  "author": "dalia1901166",
+  "url": "https://sketchfab.com/3d-models/2cdd3c3e6c344f279229b824e3f5db64"
+ },
+ {
+  "title": "Reichstag Fbx",
+  "author": "lutzibutz",
+  "url": "https://sketchfab.com/3d-models/e5da471dc8cd4eae95877d9ef77a9ed8"
+ },
+ {
+  "title": "Souvenir Statue of Liberty model",
+  "author": "jerryfisher",
+  "url": "https://sketchfab.com/3d-models/a6eed066d5044ff6bd1d1ba1954a092e"
+ },
+ {
+  "title": "Sagrada Família front facade",
+  "author": "FUD-UJEP",
+  "url": "https://sketchfab.com/3d-models/385d0c915b0b42e6829acae811f06fbe"
  }
 ]

@@ -113,8 +113,8 @@ class Game {
     const canvas = $('#game')
     const r = new THREE.WebGLRenderer({ canvas, antialias: this.quality !== 'low', powerPreference: 'high-performance' })
     r.outputColorSpace = THREE.SRGBColorSpace
-    r.toneMapping = THREE.ACESFilmicToneMapping
-    r.toneMappingExposure = 1.05
+    r.toneMapping = THREE.AgXToneMapping
+    r.toneMappingExposure = 1.15
     r.shadowMap.enabled = this.quality !== 'low'
     r.shadowMap.type = THREE.PCFSoftShadowMap
     this.renderer = r
@@ -216,18 +216,18 @@ class Game {
     if (this.world) this.world.dispose()
     if (this.car) this.car.dispose()
     this.cancelRace(true)
-    this.city = cityById(id)
+    this.city = this.applyLighting(cityById(id))
     this.save.city = this.city.id
     Save.save()
-    this.world = new World(this.city, this.scene, this.physics, this.quality)
+    this.world = new World(this.city, this.scene, this.physics, this.quality, this.renderer)
     const found = this.save.discovered[this.city.id] ?? []
     this.world.landmarks.forEach((lm, i) => (lm.discovered = found.includes(i)))
     this.spawnCar()
     this.skids.clear()
     this.runCoins = 0
-    this.bloom.strength = this.city.time === 'night' ? 0.7 : this.city.time === 'sunset' ? 0.45 : 0.3
-    this.bloom.threshold = this.city.time === 'night' ? 0.82 : 0.88
-    this.renderer.toneMappingExposure = this.city.time === 'night' ? 1.1 : 1.0
+    this.bloom.strength = this.city.time === 'night' ? 0.7 : this.city.time === 'sunset' ? 0.45 : 0.15
+    this.bloom.threshold = this.city.time === 'night' ? 0.82 : 0.95
+    this.renderer.toneMappingExposure = this.city.time === 'night' ? 1.2 : this.city.time === 'day' ? 0.55 : 1.1
     this.drawMinimapBase()
     if (this.audio.ctx) {
       this.audio.playMusic(this.city.music.style, this.city.music.tempo)
@@ -237,6 +237,22 @@ class Game {
     this.camera.position.set(this.car.position.x, 12, this.car.position.z - 20)
     $('#loading').classList.add('fade')
     setTimeout(() => $('#loading').classList.add('hidden'), 500)
+  }
+
+  // 'day' (default): every city in bright, realistic midday light. 'mood': each city's own
+  // sunset/night atmosphere.
+  applyLighting(base) {
+    if ((this.save.settings.lighting ?? 'day') === 'mood') return base
+    const [x, , z] = base.sunPos
+    const desert = base.style === 'desert' || base.style === 'rural'
+    return {
+      ...base,
+      time: 'day',
+      sky: ['#3b82d6', '#d4e5f3'],
+      fog: desert ? '#e9e0cf' : '#d3e1ec',
+      sun: '#fff5e6',
+      sunPos: [x || 0.4, 1.35, z || 0.5],
+    }
   }
 
   spawnCar() {
@@ -440,7 +456,7 @@ class Game {
       this.audio.tickAmbience()
     }
     if (playing) this.updateHUD()
-    if (this.useBloom) this.composer.render()
+    if (this.useBloom && this.city?.time !== 'day') this.composer.render()
     else this.renderer.render(this.scene, this.camera)
   }
 
@@ -1104,6 +1120,7 @@ class Game {
           <div class="setting"><label>🎵 ${t('music')}</label><input type="range" min="0" max="1" step="0.05" value="${st.music}" id="sMusic"></div>
           <div class="setting"><label>🔊 ${t('sfx')}</label><input type="range" min="0" max="1" step="0.05" value="${st.sfx}" id="sSfx"></div>
           <div class="setting"><label>✨ ${t('quality')}</label>${seg('quality', [['low', t('low')], ['medium', t('medium')], ['high', t('high')]], this.quality)}</div>
+          <div class="setting"><label>☀️ ${t('lighting')}</label>${seg('lighting', [['day', t('lightDay')], ['mood', t('lightMood')]], st.lighting ?? 'day')}</div>
           <div class="setting"><label>📳 ${t('vibration')}</label>${seg('vibration', [[true, t('on')], [false, t('off')]], st.vibration)}</div>
           <div class="setting"><label>🌐 ${t('language')}</label>${seg('lang', LANGUAGES, getLanguage())}</div>
           <div class="setting"><label>🔒 ${t('privacy')}</label><a href="${PRIVACY_URL}" target="_blank" rel="noopener">${PRIVACY_URL.replace('https://', '')}</a></div>
@@ -1131,6 +1148,12 @@ class Game {
           if (v !== this.quality) {
             this.quality = v
             this.applyQuality()
+            this.loadCity(this.city.id)
+          }
+        } else if (name === 'lighting') {
+          if ((st.lighting ?? 'day') !== v) {
+            st.lighting = v
+            Save.save()
             this.loadCity(this.city.id)
           }
         } else if (name === 'vibration') st.vibration = v === 'true'

@@ -16,14 +16,18 @@ The following landmark models are used under the **Creative Commons Attribution 
 | empireState | Empire State Building | noahlupowitz | https://sketchfab.com/3d-models/fca3604d310a40579f803b355e18f9cf |
 | goldenGate | Golden Gate Bridge Stylized Low Poly | vitorsaito | https://sketchfab.com/3d-models/b4e1a33675d746f0be8e991b3268407c |
 | hagiaSophia | Ayasofya3D | suatzkaynak34 | https://sketchfab.com/3d-models/8b328f623677468d9fc97180de97cfe5 |
-| galataTower | Galata Kulesi | bar0nline | https://sketchfab.com/3d-models/80590fdc113240c7b85d2d873fc5385a |
 | maidensTower | Kız Kulesi | bar0nline | https://sketchfab.com/3d-models/1d186da8db924d2da604eb489ce0a869 |
 | parthenon | Parthenon | microsoft | https://sketchfab.com/3d-models/8390c61a76cb48c989ddf975a0a06c8d |
 | sensoji | japanese shrine - pagoda | LeviWalker1999 | https://sketchfab.com/3d-models/7be6145f685f47a3a61ee3f19298cadd |
-| statueLiberty | Statue Of Liberty | gravityjack | https://sketchfab.com/3d-models/84094e8d5e724b5c882cf576ca12e44e |
 | torii | Japanese Torii Gate | sahirvirmani | https://sketchfab.com/3d-models/2027a248de1b4b70985ff97e708fb50d |
 | tvTower | Lowpoly Berlin TV Tower - Fernsehturm | iwanPlays | https://sketchfab.com/3d-models/b072f1a7b44f4e1583416c8129561b29 |
 | windmill | Windmill Stylized | a_l_e_x_a_n_d_e_r | https://sketchfab.com/3d-models/a7780e3667954bbf97bb619cb8a3e272 |
+| galataTower | Mini Galata Tower-2 | ErtugrulAydin | https://sketchfab.com/3d-models/0780a7e5369442c3967681084a046588 |
+| notreDame | Notre Dame Cathedral  (Work in progress) | RaizVR | https://sketchfab.com/3d-models/d1a0f65c217740ec800021b6771964f1 |
+| operaHouse | Sydney Opera House | dalia1901166 | https://sketchfab.com/3d-models/2cdd3c3e6c344f279229b824e3f5db64 |
+| reichstag | Reichstag Fbx | lutzibutz | https://sketchfab.com/3d-models/e5da471dc8cd4eae95877d9ef77a9ed8 |
+| statueLiberty | Souvenir Statue of Liberty model | jerryfisher | https://sketchfab.com/3d-models/a6eed066d5044ff6bd1d1ba1954a092e |
+| sagrada | Sagrada Família front facade | FUD-UJEP | https://sketchfab.com/3d-models/385d0c915b0b42e6829acae811f06fbe |
 
 ## Libraries
 

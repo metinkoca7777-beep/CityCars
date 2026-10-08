@@ -14,22 +14,26 @@ const PI = Math.PI
 // col: 'keep' = keep the procedural colliders, 'box' | 'cyl' | 'legs' = derive from the model's bounds.
 // base: extra procedural parts drawn under/around the model (islands, pedestals...).
 export const MODELS = {
-  arcTriomphe: { fit: 'width', size: 31, col: 'keep' },
+  arcTriomphe: { fit: 'width', size: 31, col: 'keep', detail: 'stone', tint: '#efe3c8' },
   bigBen: { fit: 'height', size: 72, col: 'box', shrink: 0.9 },
   burjAlArab: { fit: 'height', size: 64, y: 2, col: 'keep', base: 'island' },
   burjKhalifa: { fit: 'height', size: 180, col: 'box', shrink: 0.7 },
-  christRedeemer: { fit: 'height', size: 19, y: 30, col: 'keep', base: 'corcovado' },
+  christRedeemer: { fit: 'height', size: 19, y: 30, col: 'keep', base: 'corcovado', detail: 'marble' },
   colosseum: { fit: 'max', size: 56, col: 'cyl', shrink: 0.92 },
   eiffel: { fit: 'height', size: 98, col: 'legs', tint: '#9c7a5c', glow: '#ffb257' },
-  empireState: { fit: 'height', size: 132, col: 'box', shrink: 0.85, glow: '#9fc4ff' },
-  hagiaSophia: { fit: 'max', size: 56, col: 'box', shrink: 0.75, tint: '#ffd9b8' },
-  galataTower: { fit: 'height', size: 46, col: 'cyl', shrink: 0.8 },
+  empireState: { fit: 'height', size: 132, col: 'box', shrink: 0.85, glow: '#9fc4ff', detail: 'stone', tint: '#e2dccd' },
+  hagiaSophia: { fit: 'max', size: 56, col: 'box', shrink: 0.75, tint: '#e8b08a', detail: 'stone' },
+  galataTower: { fit: 'height', size: 52, col: 'cyl', shrink: 0.85 },
+  notreDame: { fit: 'max', size: 58, col: 'box', shrink: 0.8 },
+  operaHouse: { fit: 'max', size: 58, col: 'box', shrink: 0.85 },
+  reichstag: { fit: 'max', size: 56, col: 'box', shrink: 0.85 },
+  sagrada: { fit: 'max', size: 56, col: 'box', shrink: 0.7 },
   maidensTower: { fit: 'max', size: 14, y: 2.2, col: 'keep', base: 'maidenIsland' },
-  parthenon: { fit: 'max', size: 40, y: 5, col: 'keep', base: 'acropolis' },
+  parthenon: { fit: 'max', size: 40, y: 5, col: 'keep', base: 'acropolis', detail: 'marble', tint: '#f3ead8' },
   sensoji: { fit: 'height', size: 36, col: 'keep', base: 'kaminarimon' },
-  statueLiberty: { fit: 'height', size: 31, y: 17.2, col: 'keep', base: 'libertyIsland' },
+  statueLiberty: { fit: 'height', size: 46, y: 4, col: 'keep', base: 'libertyFort' },
   meijiTorii: { file: 'torii', fit: 'max', size: 21, z: 10, ry: PI / 2, col: 'keep', base: 'meijiShrine' },
-  tvTower: { fit: 'height', size: 128, col: 'cyl', shrink: 0.35, glow: '#ffd994' },
+  tvTower: { fit: 'height', size: 128, col: 'cyl', shrink: 0.35, glow: '#ffd994', detail: 'concrete' },
   windmills: { file: 'windmill', copies: [[-14, -6, 21, 0.3], [2, -12, 19, -0.2], [16, -4, 17, 0.5]], col: 'keep', base: 'polder' },
 }
 
@@ -68,6 +72,7 @@ function fitted(gltf, cfg, size = cfg.size, night = false) {
       const mm = src.clone()
       if (tint) mm.color.multiply(tint)
       if ('metalness' in mm) mm.metalness = Math.min(mm.metalness, 0.3)
+      if (cfg.detail && !mm.map) addDetail(mm, cfg.detail)
       if (night) {
         mm.emissive = new THREE.Color(cfg.glow ?? '#ffe2b0').multiplyScalar(0.35)
         if (mm.map) mm.emissiveMap = mm.map
@@ -115,6 +120,72 @@ export async function buildModelBackdrop(id) {
   return holder
 }
 
+// ---- triplanar surface detail for untextured models (stone blocks / marble / concrete) ----
+const detailTextures = {}
+function detailTexture(kind) {
+  if (detailTextures[kind]) return detailTextures[kind]
+  const N = 256
+  const c = document.createElement('canvas')
+  c.width = c.height = N
+  const g = c.getContext('2d')
+  const img = g.createImageData(N, N)
+  let seed = kind.length * 977
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
+  const noise = new Float32Array(N * N).map(() => rnd())
+  const smooth = (x, y) => {
+    let v = 0
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) v += noise[((y + dy + N) % N) * N + ((x + dx + N) % N)]
+    return v / 25
+  }
+  const rows = kind === 'stone' ? 8 : 4
+  const cols = kind === 'stone' ? 4 : 2
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      let v = 0.86 + (smooth(x, y) - 0.5) * 0.35 + (noise[y * N + x] - 0.5) * 0.06
+      if (kind === 'marble') v = 0.93 + Math.sin((x + y * 0.6) * 0.05 + smooth(x, y) * 9) * 0.04 + (noise[y * N + x] - 0.5) * 0.03
+      const row = Math.floor((y / N) * rows)
+      const bx = (x + (row % 2 ? N / cols / 2 : 0)) % (N / cols)
+      const by = y % (N / rows)
+      if (kind !== 'concrete' && (by < 2 || bx < 2)) v *= kind === 'stone' ? 0.72 : 0.9
+      if (kind === 'concrete') v = 0.9 + (smooth(x, y) - 0.5) * 0.2 + (by < 1 ? -0.1 : 0)
+      const b = Math.max(0, Math.min(255, v * 255))
+      const i = (y * N + x) * 4
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = b
+      img.data[i + 3] = 255
+    }
+  }
+  g.putImageData(img, 0, 0)
+  const tex = new THREE.CanvasTexture(c)
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping
+  tex.anisotropy = 4
+  detailTextures[kind] = tex
+  return tex
+}
+
+function addDetail(mat, kind) {
+  const tex = detailTexture(kind)
+  const scale = kind === 'stone' ? 0.22 : kind === 'marble' ? 0.12 : 0.08
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.detailMap = { value: tex }
+    sh.uniforms.detailScale = { value: scale }
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vDPos;\nvarying vec3 vDNrm;')
+      .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvDPos = (modelMatrix * vec4(transformed, 1.0)).xyz;\nvDNrm = normalize(mat3(modelMatrix) * objectNormal);')
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform sampler2D detailMap;\nuniform float detailScale;\nvarying vec3 vDPos;\nvarying vec3 vDNrm;')
+      .replace(
+        '#include <map_fragment>',
+        `#include <map_fragment>
+        vec3 bw = pow(abs(normalize(vDNrm)), vec3(4.0));
+        bw /= (bw.x + bw.y + bw.z);
+        vec3 det = texture2D(detailMap, vDPos.zy * detailScale).rgb * bw.x + texture2D(detailMap, vDPos.xz * detailScale).rgb * bw.y + texture2D(detailMap, vDPos.xy * detailScale).rgb * bw.z;
+        diffuseColor.rgb *= det * 1.08;`,
+      )
+  }
+  mat.customProgramCacheKey = () => 'detail-' + kind
+  mat.needsUpdate = true
+}
+
 const water = () => mat('#2a9fc4', { metal: 0.2, rough: 0.12, emissive: '#0b5f86', ei: 0.25 })
 
 // Procedural ground pieces that go with some of the models.
@@ -133,6 +204,10 @@ const BASES = {
   },
   acropolis(k) {
     k.cyl(22, 25, 5, '#bba98a', 0, 0, 0, { seg: 9 })
+  },
+  libertyFort(k) {
+    k.box(24, 4, 24, '#a49a86')
+    k.box(24, 4, 24, '#a49a86', 0, 0, 0, { ry: PI / 4 })
   },
   libertyIsland(k) {
     k.box(24, 4, 24, '#a49a86')

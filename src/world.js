@@ -2,10 +2,11 @@
 import * as THREE from 'three'
 import * as CANNON from 'cannon-es'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { Sky } from 'three/examples/jsm/objects/Sky.js'
 import { GRID } from './cities.js'
 import { buildLandmark, buildBalloons, Kit } from './landmarks.js'
 import { buildModelLandmark, buildModelBackdrop } from './models.js'
-import { mat, facadeMat, boxUV, mergeStatic, applyTimeOfDay } from './materials.js'
+import { mat, facadeMat, boxUV, mergeStatic, applyTimeOfDay, groundTexture } from './materials.js'
 import { mulberry32, hashString, pick } from './utils.js'
 import { buildCarMesh, CARS } from './cars.js'
 
@@ -20,7 +21,8 @@ export const roadLine = (i) => -HALF + i * CELL
 export const blockCenter = (c) => -HALF + c * CELL + CELL / 2
 
 export class World {
-  constructor(city, scene, physics, quality) {
+  constructor(city, scene, physics, quality, renderer) {
+    this.renderer = renderer
     this.city = city
     this.scene = scene
     this.physics = physics
@@ -142,23 +144,51 @@ export class World {
     const bottom = new THREE.Color(city.sky[1])
     const sunDir = new THREE.Vector3(...city.sunPos).normalize()
     this.sunDir = sunDir
-    const skyMat = new THREE.ShaderMaterial({
-      side: THREE.BackSide,
-      depthWrite: false,
-      fog: false,
-      uniforms: { top: { value: top }, bottom: { value: bottom }, sunDir: { value: sunDir }, sunColor: { value: new THREE.Color(city.sun) }, night: { value: this.night ? 1 : 0 } },
-      vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); gl_Position.z = gl_Position.w; }`,
-      fragmentShader: `uniform vec3 top; uniform vec3 bottom; uniform vec3 sunDir; uniform vec3 sunColor; uniform float night; varying vec3 vDir;
-        void main(){ float h = clamp(vDir.y*1.4+0.15,0.0,1.0); vec3 c = mix(bottom, top, pow(h,0.8));
-          float s = max(dot(normalize(vDir), sunDir),0.0);
-          c += sunColor * (pow(s, 600.0)*1.6 + pow(s, 12.0)*0.25*(1.0-night));
-          gl_FragColor = vec4(c,1.0); }`,
-    })
-    const sky = new THREE.Mesh(new THREE.SphereGeometry(1800, 32, 16), skyMat)
-    sky.renderOrder = -1
-    sky.frustumCulled = false
-    this.root.add(sky)
-    this.sky = sky
+    if (city.time === 'day') {
+      // Physically based atmosphere (Preetham) + image-based lighting from it.
+      const sky = new Sky()
+      sky.scale.setScalar(4000)
+      const u = sky.material.uniforms
+      u.turbidity.value = 3.2
+      u.rayleigh.value = 1.1
+      u.mieCoefficient.value = 0.004
+      u.mieDirectionalG.value = 0.82
+      u.sunPosition.value.copy(sunDir)
+      sky.frustumCulled = false
+      sky.material.fog = false
+      this.root.add(sky)
+      this.sky = sky
+      if (this.renderer) {
+        const pmrem = new THREE.PMREMGenerator(this.renderer)
+        const envScene = new THREE.Scene()
+        const envSky = new Sky()
+        envSky.scale.setScalar(900)
+        for (const k of Object.keys(u)) envSky.material.uniforms[k].value = u[k].value
+        envScene.add(envSky)
+        this.envMap = pmrem.fromScene(envScene, 0.02, 0.1, 2000).texture
+        pmrem.dispose()
+        this.scene.environment = this.envMap
+        this.scene.environmentIntensity = 0.25
+      }
+    } else {
+      const skyMat = new THREE.ShaderMaterial({
+        side: THREE.BackSide,
+        depthWrite: false,
+        fog: false,
+        uniforms: { top: { value: top }, bottom: { value: bottom }, sunDir: { value: sunDir }, sunColor: { value: new THREE.Color(city.sun) }, night: { value: this.night ? 1 : 0 } },
+        vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); gl_Position.z = gl_Position.w; }`,
+        fragmentShader: `uniform vec3 top; uniform vec3 bottom; uniform vec3 sunDir; uniform vec3 sunColor; uniform float night; varying vec3 vDir;
+          void main(){ float h = clamp(vDir.y*1.4+0.15,0.0,1.0); vec3 c = mix(bottom, top, pow(h,0.8));
+            float s = max(dot(normalize(vDir), sunDir),0.0);
+            c += sunColor * (pow(s, 600.0)*1.6 + pow(s, 12.0)*0.25*(1.0-night));
+            gl_FragColor = vec4(c,1.0); }`,
+      })
+      const sky = new THREE.Mesh(new THREE.SphereGeometry(1800, 32, 16), skyMat)
+      sky.renderOrder = -1
+      sky.frustumCulled = false
+      this.root.add(sky)
+      this.sky = sky
+    }
 
     if (this.night) {
       const n = 900
@@ -177,13 +207,14 @@ export class World {
       this.buildClouds()
     }
 
-    this.scene.fog = new THREE.Fog(city.fog, this.night ? 120 : 160, this.quality === 'low' ? 520 : 760)
+    const day = city.time === 'day'
+    this.scene.fog = new THREE.Fog(city.fog, day ? 260 : this.night ? 120 : 160, this.quality === 'low' ? 620 : day ? 1100 : 760)
     this.scene.background = bottom.clone()
 
     const hemiSky = this.night ? '#7d8fd6' : city.sky[0]
-    const hemi = new THREE.HemisphereLight(hemiSky, this.night ? '#3a3550' : city.ground, this.night ? 1.25 : city.time === 'sunset' ? 1.15 : 1.35)
+    const hemi = new THREE.HemisphereLight(hemiSky, this.night ? '#3a3550' : city.ground, this.night ? 1.25 : city.time === 'sunset' ? 1.15 : 0.6)
     this.root.add(hemi)
-    const sun = new THREE.DirectionalLight(city.sun, this.night ? 0.9 : city.time === 'sunset' ? 1.9 : 2.4)
+    const sun = new THREE.DirectionalLight(city.sun, this.night ? 0.9 : city.time === 'sunset' ? 1.9 : 3)
     sun.position.copy(sunDir).multiplyScalar(120)
     sun.castShadow = this.quality !== 'low'
     const sm = this.quality === 'high' ? 2048 : 1024
@@ -201,7 +232,9 @@ export class World {
   }
 
   buildClouds() {
-    const cm = mat(this.city.time === 'sunset' ? '#ffd9c4' : '#ffffff', { fog: false, rough: 1, emissive: this.city.time === 'sunset' ? '#ffb08a' : '#d8e6f5', ei: 0.35 })
+    const cm = this.city.time === 'day'
+      ? new THREE.MeshBasicMaterial({ color: '#ffffff', fog: false, toneMapped: false, transparent: true, opacity: 0.92 })
+      : mat(this.city.time === 'sunset' ? '#ffd9c4' : '#ffffff', { fog: false, rough: 1, emissive: this.city.time === 'sunset' ? '#ffb08a' : '#d8e6f5', ei: 0.35 })
     const puffs = []
     this.clouds = []
     for (let i = 0; i < 16; i++) {
@@ -243,13 +276,20 @@ export class World {
   // ---------- ground ----------
   buildGround() {
     const city = this.city
-    const groundMat = mat(city.ground, { rough: 1 })
+    const groundMat = new THREE.MeshStandardMaterial({ color: city.ground, roughness: 1 })
+    const gTex = groundTexture('noise').clone()
+    gTex.needsUpdate = true
+    gTex.repeat.set(500, 500)
+    groundMat.map = gTex
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), groundMat)
     ground.rotation.x = -Math.PI / 2
     ground.position.y = -0.05
     ground.receiveShadow = true
     this.root.add(ground)
-    const asphalt = new THREE.Mesh(new THREE.PlaneGeometry(GRID * CELL + ROAD, GRID * CELL + ROAD), mat(this.night ? '#2c2f36' : '#43464d', { rough: 0.95 }))
+    const aTex = groundTexture('asphalt').clone()
+    aTex.needsUpdate = true
+    aTex.repeat.set((GRID * CELL + ROAD) / 7, (GRID * CELL + ROAD) / 7)
+    const asphalt = new THREE.Mesh(new THREE.PlaneGeometry(GRID * CELL + ROAD, GRID * CELL + ROAD), new THREE.MeshStandardMaterial({ map: aTex, color: this.night ? '#8a8f99' : '#ffffff', roughness: 0.92 }))
     asphalt.rotation.x = -Math.PI / 2
     asphalt.position.y = 0
     asphalt.receiveShadow = true
@@ -456,8 +496,14 @@ export class World {
   buildBlocks() {
     const city = this.city
     const rng = this.rng
-    const sidewalk = mat(this.night ? '#8f8a82' : '#c2bbae', { rough: 0.95 })
-    const grassMat = mat(city.style === 'desert' ? '#cdb27e' : city.style === 'rural' ? '#c9b48a' : '#6aa04f', { rough: 1 })
+    const swTex = groundTexture('slab').clone()
+    swTex.needsUpdate = true
+    swTex.repeat.set(15, 15)
+    const sidewalk = new THREE.MeshStandardMaterial({ map: swTex, color: this.night ? '#b5b0a8' : '#ffffff', roughness: 0.9 })
+    const grTex = groundTexture(city.style === 'desert' || city.style === 'rural' ? 'sand' : 'grass').clone()
+    grTex.needsUpdate = true
+    grTex.repeat.set(12, 12)
+    const grassMat = new THREE.MeshStandardMaterial({ map: grTex, roughness: 1 })
     const blockGeos = []
     const grassGeos = []
     const bGeos = []
@@ -1202,13 +1248,17 @@ export class World {
     if (playerPos) {
       this.sun.position.set(playerPos.x + this.sunDir.x * 120, this.sunDir.y * 120, playerPos.z + this.sunDir.z * 120)
       this.sun.target.position.set(playerPos.x, 0, playerPos.z)
-      this.sky.position.set(playerPos.x, 0, playerPos.z)
+      this.sky.position.set(playerPos.x, this.sky.isMesh && this.sky.material.uniforms?.turbidity ? 0 : 0, playerPos.z)
       if (this.stars) this.stars.position.set(playerPos.x, 0, playerPos.z)
     }
   }
 
   dispose() {
     this.disposed = true
+    if (this.envMap) {
+      this.envMap.dispose()
+      this.scene.environment = null
+    }
     for (const b of this.bodies) this.physics.removeBody(b)
     this.scene.remove(this.root)
     this.root.traverse((o) => {

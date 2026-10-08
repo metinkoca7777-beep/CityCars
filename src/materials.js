@@ -62,7 +62,7 @@ export function boxUV(geo, w, h, d, tile = 24) {
 // Building facade texture: walls are white (tinted by vertex colors), windows dark.
 // The emissive map lights a random subset of windows at night.
 export function makeWindowTextures(seed = 1, style = 'modern') {
-  const size = 256
+  const size = 512
   const cells = 8
   const c = document.createElement('canvas')
   c.width = c.height = size
@@ -70,45 +70,143 @@ export function makeWindowTextures(seed = 1, style = 'modern') {
   const e = document.createElement('canvas')
   e.width = e.height = size
   const ge = e.getContext('2d')
-  g.fillStyle = '#ffffff'
-  g.fillRect(0, 0, size, size)
   ge.fillStyle = '#000000'
   ge.fillRect(0, 0, size, size)
   let s = seed
   const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647)
+  // Plaster / concrete base with subtle grain (white so vertex colours tint it)
+  const img = g.createImageData(size, size)
+  for (let i = 0; i < size * size; i++) {
+    const v = 236 + (rnd() - 0.5) * 22
+    img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = v
+    img.data[i * 4 + 3] = 255
+  }
+  g.putImageData(img, 0, 0)
   const cell = size / cells
   const glass = style === 'modern'
-  for (let y = 0; y < cells; y++) {
-    for (let x = 0; x < cells; x++) {
-      const px = x * cell
+  const sky = (x, y, h) => {
+    const grd = g.createLinearGradient(x, y, x, y + h)
+    grd.addColorStop(0, glass ? '#9cc3e4' : '#8fb2d0')
+    grd.addColorStop(0.55, glass ? '#5f86a8' : '#4a6178')
+    grd.addColorStop(1, glass ? '#3b5670' : '#2c3a48')
+    return grd
+  }
+  if (glass) {
+    // Curtain wall: continuous glass bands, slim mullions, spandrel strips
+    for (let y = 0; y < cells; y++) {
       const py = y * cell
-      const mw = glass ? 0.12 : 0.28
-      const mh = glass ? 0.14 : 0.22
-      const wx = px + cell * mw
-      const wy = py + cell * mh
-      const ww = cell * (1 - mw * 2)
-      const wh = cell * (1 - mh * 2)
-      g.fillStyle = glass ? `hsl(205, 30%, ${28 + rnd() * 18}%)` : `hsl(215, 25%, ${22 + rnd() * 14}%)`
-      g.fillRect(wx, wy, ww, wh)
-      if (!glass) {
-        g.fillStyle = 'rgba(255,255,255,0.35)'
-        g.fillRect(wx, wy + wh - 3, ww, 3)
+      g.fillStyle = sky(0, py, cell * 0.78)
+      g.fillRect(0, py + cell * 0.18, size, cell * 0.78)
+      g.fillStyle = 'rgba(210,220,228,1)'
+      g.fillRect(0, py, size, cell * 0.18)
+      g.fillStyle = 'rgba(255,255,255,0.18)'
+      g.fillRect(0, py + cell * 0.2, size, 3)
+      for (let x = 0; x <= cells * 2; x++) {
+        g.fillStyle = '#c9d2da'
+        g.fillRect(x * (cell / 2) - 1.5, py + cell * 0.18, 3, cell * 0.78)
       }
-      if (rnd() < 0.42) {
-        const warm = rnd()
-        ge.fillStyle = warm < 0.7 ? `hsl(${38 + rnd() * 12}, 100%, ${55 + rnd() * 20}%)` : `hsl(${190 + rnd() * 30}, 80%, 70%)`
-        ge.fillRect(wx, wy, ww, wh)
+      for (let x = 0; x < cells * 2; x++) {
+        if (rnd() < 0.3) {
+          ge.fillStyle = `hsl(${40 + rnd() * 15}, 90%, ${55 + rnd() * 20}%)`
+          ge.fillRect(x * (cell / 2) + 2, py + cell * 0.2, cell / 2 - 4, cell * 0.74)
+        }
+      }
+    }
+  } else {
+    for (let y = 0; y < cells; y++) {
+      for (let x = 0; x < cells; x++) {
+        const px = x * cell
+        const py = y * cell
+        const ww = cell * 0.46
+        const wh = cell * 0.6
+        const wx = px + (cell - ww) / 2
+        const wy = py + cell * 0.16
+        // cornice line between floors
+        g.fillStyle = 'rgba(0,0,0,0.06)'
+        g.fillRect(px, py + cell - 3, cell, 3)
+        // frame, glass, mullions, sill, shutters
+        g.fillStyle = '#f7f5f0'
+        g.fillRect(wx - 4, wy - 4, ww + 8, wh + 8)
+        g.fillStyle = sky(wx, wy, wh)
+        g.fillRect(wx, wy, ww, wh)
+        g.fillStyle = '#f2efe8'
+        g.fillRect(wx + ww / 2 - 1.5, wy, 3, wh)
+        g.fillRect(wx, wy + wh * 0.38, ww, 3)
+        g.fillStyle = 'rgba(255,255,255,0.25)'
+        g.fillRect(wx + 3, wy + 3, ww * 0.35, wh * 0.25)
+        g.fillStyle = '#d9d4ca'
+        g.fillRect(wx - 7, wy + wh + 3, ww + 14, 6)
+        g.fillStyle = 'rgba(0,0,0,0.18)'
+        g.fillRect(wx - 7, wy + wh + 9, ww + 14, 3)
+        if (seed % 2 === 1 && rnd() < 0.35) {
+          g.fillStyle = rnd() < 0.5 ? '#5b7a5a' : '#8a5a3a'
+          g.fillRect(wx - 4 - ww * 0.32, wy - 2, ww * 0.3, wh + 4)
+          g.fillRect(wx + ww + 4 + 2, wy - 2, ww * 0.3, wh + 4)
+        }
+        if (rnd() < 0.4) {
+          ge.fillStyle = `hsl(${38 + rnd() * 12}, 100%, ${55 + rnd() * 20}%)`
+          ge.fillRect(wx, wy, ww, wh)
+        }
       }
     }
   }
   const map = new THREE.CanvasTexture(c)
   map.wrapS = map.wrapT = THREE.RepeatWrapping
   map.colorSpace = THREE.SRGBColorSpace
-  map.anisotropy = 4
+  map.anisotropy = 8
   const emissiveMap = new THREE.CanvasTexture(e)
   emissiveMap.wrapS = emissiveMap.wrapT = THREE.RepeatWrapping
   emissiveMap.colorSpace = THREE.SRGBColorSpace
   return { map, emissiveMap }
+}
+
+// Tileable ground textures (asphalt, paving slabs, grass).
+const groundCache = {}
+export function groundTexture(kind) {
+  if (groundCache[kind]) return groundCache[kind]
+  const N = 256
+  const c = document.createElement('canvas')
+  c.width = c.height = N
+  const g = c.getContext('2d')
+  const img = g.createImageData(N, N)
+  let s = kind.length * 131
+  const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647)
+  const base = { asphalt: [70, 72, 76], slab: [196, 190, 178], grass: [92, 138, 64], sand: [214, 190, 140], noise: [225, 225, 225] }[kind]
+  for (let i = 0; i < N * N; i++) {
+    const n = (rnd() - 0.5) * (kind === 'asphalt' ? 34 : kind === 'grass' ? 40 : 18)
+    const k = kind === 'grass' ? 1 + (rnd() - 0.5) * 0.25 : 1
+    img.data[i * 4] = base[0] * k + n
+    img.data[i * 4 + 1] = base[1] * k + n
+    img.data[i * 4 + 2] = base[2] * k + n * (kind === 'grass' ? 0.4 : 1)
+    img.data[i * 4 + 3] = 255
+  }
+  g.putImageData(img, 0, 0)
+  if (kind === 'slab') {
+    g.strokeStyle = 'rgba(90,85,78,0.45)'
+    g.lineWidth = 2
+    for (let i = 0; i <= 4; i++) {
+      g.beginPath(); g.moveTo(i * 64, 0); g.lineTo(i * 64, N); g.stroke()
+      g.beginPath(); g.moveTo(0, i * 64); g.lineTo(N, i * 64); g.stroke()
+    }
+  }
+  if (kind === 'asphalt') {
+    for (let i = 0; i < 6; i++) {
+      g.strokeStyle = 'rgba(30,30,32,0.35)'
+      g.lineWidth = 1 + rnd() * 2
+      g.beginPath()
+      let x = rnd() * N
+      let y = rnd() * N
+      g.moveTo(x, y)
+      for (let k = 0; k < 6; k++) g.lineTo((x += (rnd() - 0.5) * 40), (y += (rnd() - 0.5) * 40))
+      g.stroke()
+    }
+  }
+  const tex = new THREE.CanvasTexture(c)
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping
+  tex.colorSpace = THREE.SRGBColorSpace
+  tex.anisotropy = 8
+  groundCache[kind] = tex
+  return tex
 }
 
 const facadeTextures = {}
@@ -127,8 +225,8 @@ export function facadeMat(color = 0xffffff, style = 'classic', vertexColors = fa
       emissiveMap,
       emissive: 0xffffff,
       emissiveIntensity: 0,
-      roughness: style === 'modern' ? 0.4 : 0.85,
-      metalness: style === 'modern' ? 0.25 : 0,
+      roughness: style === 'modern' ? 0.22 : 0.85,
+      metalness: style === 'modern' ? 0.35 : 0,
       vertexColors,
       flatShading: true,
     })
