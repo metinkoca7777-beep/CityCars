@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CityCars: World Tour</string>
+    <string name="title_activity_main">CityCars: World Tour</string>
+    <string name="package_name">com.kolomp.citycars</string>
+    <string name="custom_url_scheme">com.kolomp.citycars</string>
+</resources>
