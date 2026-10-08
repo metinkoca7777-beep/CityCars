@@ -104,10 +104,5 @@ export const MODEL_CREDITS = [
   "title": "Souvenir Statue of Liberty model",
   "author": "jerryfisher",
   "url": "https://sketchfab.com/3d-models/a6eed066d5044ff6bd1d1ba1954a092e"
- },
- {
-  "title": "Sagrada Família front facade",
-  "author": "FUD-UJEP",
-  "url": "https://sketchfab.com/3d-models/385d0c915b0b42e6829acae811f06fbe"
  }
 ]

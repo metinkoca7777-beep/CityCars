@@ -27,8 +27,8 @@ The following landmark models are used under the **Creative Commons Attribution 
 | operaHouse | Sydney Opera House | dalia1901166 | https://sketchfab.com/3d-models/2cdd3c3e6c344f279229b824e3f5db64 |
 | reichstag | Reichstag Fbx | lutzibutz | https://sketchfab.com/3d-models/e5da471dc8cd4eae95877d9ef77a9ed8 |
 | statueLiberty | Souvenir Statue of Liberty model | jerryfisher | https://sketchfab.com/3d-models/a6eed066d5044ff6bd1d1ba1954a092e |
-| sagrada | Sagrada Família front facade | FUD-UJEP | https://sketchfab.com/3d-models/385d0c915b0b42e6829acae811f06fbe |
 
 ## Libraries
 
 - three.js (MIT), cannon-es (MIT), Capacitor (MIT), @capacitor-community/admob (MIT), Fredoka font (SIL OFL 1.1)
+
