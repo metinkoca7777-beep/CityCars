@@ -109,8 +109,8 @@ First release of CityCars: World Tour!
 |---|---|---|
 | App icon | `store/icon-512.png` | 512 × 512 PNG |
 | Feature graphic | `store/feature-graphic-1024x500.png` | 1024 × 500 PNG/JPG |
-| Phone screenshots | `store/screenshots/en/*.png` | 1920 × 1080 (16:9). Upload 2–8; all 8 are recommended |
-| 7" and 10" tablet screenshots | the same files | 1920 × 1080 is accepted |
+| Phone screenshots | `store/screenshots/en/01…08-*.png` | 1920 × 1080 (16:9). Play accepts 2–8 phone screenshots: upload 01–08 |
+| 7" and 10" tablet screenshots | the same files, plus `09-cities.png` | 1920 × 1080 is accepted |
 
 ---
 

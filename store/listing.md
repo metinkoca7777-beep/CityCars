@@ -70,4 +70,4 @@ Buckle up — your world tour starts now!
 ## Grafik dosyaları
 - `store/icon-512.png` – Uygulama simgesi (512×512)
 - `store/feature-graphic-1024x500.png` – Öne çıkan grafik
-- `store/screenshots/*.png` – Telefon/Tablet ekran görüntüleri (1600×900)
+- `store/screenshots/en/*.png` – İngilizce başlıklı ekran görüntüleri (1920×1080; telefon için en fazla 8 tane yükle, tablet için aynıları)
