@@ -28,9 +28,9 @@ export const MODELS = {
   parthenon: { fit: 'max', size: 40, y: 5, col: 'keep', base: 'acropolis' },
   sensoji: { fit: 'height', size: 36, col: 'keep', base: 'kaminarimon' },
   statueLiberty: { fit: 'height', size: 31, y: 17.2, col: 'keep', base: 'libertyIsland' },
-  meijiTorii: { file: 'torii', fit: 'width', size: 21, z: 10, ry: PI / 2, col: 'keep', base: 'meijiShrine' },
+  meijiTorii: { file: 'torii', fit: 'max', size: 21, z: 10, ry: PI / 2, col: 'keep', base: 'meijiShrine' },
   tvTower: { fit: 'height', size: 128, col: 'cyl', shrink: 0.35, glow: '#ffd994' },
-  windmills: { file: 'windmill', copies: [[-14, -6, 15, 0.3], [2, -12, 13, -0.2], [16, -4, 12, 0.5]], col: 'keep', base: 'polder' },
+  windmills: { file: 'windmill', copies: [[-14, -6, 21, 0.3], [2, -12, 19, -0.2], [16, -4, 17, 0.5]], col: 'keep', base: 'polder' },
 }
 
 export const BACKDROP_MODELS = {
