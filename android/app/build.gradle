@@ -5,6 +5,9 @@ apply plugin: 'com.android.application'
 //   storePassword=...
 //   keyAlias=upload
 //   keyPassword=...
+// CI passes VERSION_CODE (the run number); local builds default to 1.
+def appVersionCode = Integer.parseInt(System.getenv("VERSION_CODE") ?: "1")
+
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 if (keystorePropertiesFile.exists()) {
@@ -18,7 +21,7 @@ android {
         applicationId "com.kolomp.citycars"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode (System.getenv("VERSION_CODE") ?: "1").toInteger()
+        versionCode appVersionCode
         versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
