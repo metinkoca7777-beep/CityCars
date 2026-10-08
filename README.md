@@ -1,7 +1,7 @@
 # CityCars: World Tour 🚗🌍
 
 Dünyanın en ünlü turistik şehirlerinde oyuncak bir arabayla dolaştığın 3D sürüş oyunu.
-[bruno-simon.com](https://bruno-simon.com)'daki "oyuncak arabayla serbest gezinme" hissinden **esinlenmiş**, tamamen özgün bir oyundur: tüm modeller, sesler ve müzikler kodla (prosedürel) üretilir. Hiçbir harici görsel/ses dosyası kullanılmaz, bu yüzden APK çok küçüktür.
+[bruno-simon.com](https://bruno-simon.com)'daki "oyuncak arabayla serbest gezinme" hissinden **esinlenmiş**, özgün bir oyundur. Şehirler, arabalar, sesler ve müzikler kodla (prosedürel) üretilir; 19 turistik yer için CC BY 4.0 lisanslı, mobil için sıkıştırılmış gerçekçi 3D modeller kullanılır (`public/models/`, toplam ~6 MB, atıflar `CREDITS.md` ve oyun içi Ayarlar → Emeği geçenler).
 
 ## İçerik
 
@@ -9,7 +9,7 @@ Dünyanın en ünlü turistik şehirlerinde oyuncak bir arabayla dolaştığın 
 |---|---|
 | **17 şehir** | İstanbul, Kapadokya, Paris, Londra, New York, Roma, Atina, Tokyo, Dubai, Kahire, Rio, Sidney, Barselona, Agra, San Francisco, Berlin, Amsterdam |
 | **50+ turistik yer** | Ayasofya, Sultanahmet, Galata, Kız Kulesi, Peri Bacaları, Uçhisar, Eyfel, Zafer Takı, Louvre, Big Ben, London Eye, Tower Bridge, Özgürlük Heykeli, Times Meydanı, Kolezyum, Trevi, Parthenon, Tokyo Kulesi, Burç Halife, Piramitler, Sfenks, Kurtarıcı İsa, Opera Binası, Sagrada Família, Tac Mahal, Golden Gate… |
-| **Oynanış** | Serbest gezinti, turistik yer keşfi (bilgi kartı + ödül), altın toplama, tur yarışı (madalyalar), rampalar, bowling/kutu kulesi dağıtma, trafik |
+| **Oynanış** | Serbest gezinti, turistik yer keşfi (bilgi kartı + ödül), altın toplama, tur yarışı (madalyalar), şehir yollarında ve oyun alanında atlama rampaları, patlayan variller (zincirleme patlama), bowling/kutu kulesi dağıtma, trafik |
 | **Efektler** | Gündüz / gün batımı / neon gece, bloom ışıma, gölgeler, drift dumanı, lastik izi, nitro alevi, kıvılcım, konfeti, havai fişek, sıcak hava balonları, dönen London Eye ve yel değirmenleri |
 | **Ses** | Vites geçişli motor sesi, lastik sürtünmesi, nitro, korna, çarpma, her şehre özel prosedürel müzik (saz/makam, akordeon, koto, samba, sitar, techno…) ve ortam sesleri (martı, kuş, cırcır böceği) |
 | **Gelir** | AdMob: ödüllü reklam (x2 ödül, bedava altın), sık olmayan geçiş reklamı (en az 3 dk arayla), sadece menülerde banner. GDPR onay formu (UMP) dahil |
@@ -68,6 +68,7 @@ Her yeni sürümde `versionCode`'u artır (`VERSION_CODE` ortam değişkeni ile 
 ## Dikkat edilmesi gerekenler
 - Bazı modern yapıların (ör. Burç Halife, Louvre Piramidi, gece aydınlatmalı Eyfel) görünümü üzerinde ticari marka/tasarım hakları bulunabilir. Modeller basitleştirilmiş, sembolik çizimlerdir; yine de yayından önce hukuki açıdan kontrol edilmesi önerilir.
 - Bruno Simon'un adını, varlıklarını veya markasını mağaza sayfasında kullanma.
+- 3D modellerin lisansları Objaverse veri setindeki kayıtlara göre CC BY 4.0'dır. Yayından önce `CREDITS.md`'deki Sketchfab sayfalarından lisansların hâlâ geçerli olduğunu kontrol et; atıf ekranı oyunda kalmalı. Bir model istemezsen `public/models/` içinden dosyasını silmen yeterli — oyun otomatik olarak kodla çizilen sürüme döner.
 
 ## Proje yapısı
 ```

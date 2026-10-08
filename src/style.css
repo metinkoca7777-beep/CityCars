@@ -244,3 +244,6 @@ a { color: #9ed8ff; }
 @media (max-width: 700px) {
   .settings { grid-template-columns: 1fr; }
 }
+
+.credits { overflow-y: auto; touch-action: pan-y; font-size: 14px; line-height: 1.6; color: var(--muted); }
+.credits p { color: #fff; }

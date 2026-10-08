@@ -20,7 +20,7 @@ Oyuncak arabana atla ve dünyanın en ünlü şehirlerini keşfe çık! 🚗🌍
 
 ★ Her turistik yeri keşfet, ilginç bilgiler öğren ve ödül kazan
 ★ Tur yarışında tüm noktalardan geç, altın madalya için zamana karşı yarış
-★ Rampalardan uç, bowling lobutlarını ve kutu kulelerini dağıt
+★ Rampalardan uç, patlayan varilleri havaya uçur, bowling lobutlarını ve kutu kulelerini dağıt
 ★ Nitro, drift ve korna! Gerçekçi motor ve lastik sesleri
 ★ Her şehre özel müzik: saz, akordeon, koto, samba ve daha fazlası
 ★ Gündüz, gün batımı ve neon ışıklı gece şehirleri
@@ -50,7 +50,7 @@ Hop into your toy car and road-trip the world’s most famous cities! 🚗🌍
 
 ★ Discover every landmark, learn fun facts and earn rewards
 ★ Tour races: hit every checkpoint and chase the gold medal
-★ Jump ramps, smash bowling pins and crate towers
+★ Jump ramps, blow up explosive barrels, smash bowling pins and crate towers
 ★ Nitro, drifting and horn — punchy engine and tyre sounds
 ★ Unique music for every city: saz, accordion, koto, samba and more
 ★ Day, sunset and neon-lit night cities

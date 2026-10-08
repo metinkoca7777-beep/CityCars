@@ -287,7 +287,7 @@ export class PlayerCar {
     const c = this.chassis
     const grounded = v.wheelInfos.some((w) => w.isInContact)
     this.grounded = grounded
-    if (grounded) c.applyForce(new CANNON.Vec3(0, -Math.min(speed * speed, 1600) * 1.2, 0), c.position)
+    if (grounded) c.applyForce(new CANNON.Vec3(0, -Math.min(speed * speed, 1600) * 1.2, 0))
     else {
       c.angularVelocity.x *= 1 - dt * 1.5
       c.angularVelocity.z *= 1 - dt * 1.5
@@ -309,8 +309,11 @@ export class PlayerCar {
     g.position.copy(this.chassis.position)
     g.quaternion.copy(this.chassis.quaternion)
     const v = this.vehicle
+    // updateWheelTransform() clears isInContact as a side effect; keep the physics result.
+    const contact = v.wheelInfos.map((w) => w.isInContact)
     for (let i = 0; i < 4; i++) {
       v.updateWheelTransform(i)
+      v.wheelInfos[i].isInContact = contact[i]
       const tr = v.wheelInfos[i].worldTransform
       const w = this.visual.wheels[i]
       w.group.position.copy(tr.position)

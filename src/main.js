@@ -21,6 +21,7 @@ import * as Save from './save.js'
 import * as Ads from './ads.js'
 import { t, tl, setLanguage, detectLanguage, LANGUAGES, getLanguage } from './i18n.js'
 import { isMobile, clamp, damp, formatTime } from './utils.js'
+import { MODEL_CREDITS } from './credits.js'
 
 const $ = (s) => document.querySelector(s)
 const PRIVACY_URL = 'https://metinkoca7777-beep.github.io/citycars/privacy.html'
@@ -60,8 +61,10 @@ class Game {
     this.controls.on('pause', () => (this.mode === 'play' ? this.pause() : this.mode === 'pause' ? this.resume() : null))
     this.controls.on('camera', () => this.cycleCamera())
 
-    this.smoke = new Particles(this.scene, 900, false)
-    this.sparks = new Particles(this.scene, 900, true)
+    this.smoke = new Particles(this.scene, 1600, false)
+    this.sparks = new Particles(this.scene, 1600, true)
+    this.pendingBooms = []
+    this.makeExplosionFx()
     this.skids = new SkidMarks(this.scene)
     this.arrow = this.makeArrow()
 
@@ -274,6 +277,10 @@ class Game {
     const c = e.contact
     const pt = c.bi === this.car.chassis ? c.bi.position.vadd(c.ri) : c.bj.position.vadd(c.rj)
     if (prop) {
+      if (prop.kind === 'barrel') {
+        if (impact > 1.5 && !prop.gone) this.pendingBooms.push({ prop })
+        return
+      }
       if (!prop.hit && impact > 1) {
         prop.hit = true
         this.save.stats.smashed++
@@ -291,7 +298,112 @@ class Game {
       this.shake = Math.max(this.shake, 0.25 + k * 0.6)
       this.sparks.burst(pt.x, pt.y, pt.z, 10 + Math.round(k * 24), ['#ffb703', '#fb5607', '#ffffff'], 6 + k * 6, { size: 0.3, life: 0.7, gravity: 14 })
       if (k > 0.35) this.vibrate(k > 0.7)
+      // Really hard hits go off with a (harmless) fireball.
+      if (impact > 12) this.pendingBooms.push({ x: pt.x, y: pt.y + 0.5, z: pt.z, power: 0.4, push: false })
     }
+  }
+
+  // ---------------- explosions ----------------
+  makeExplosionFx() {
+    const ringMat = new THREE.MeshBasicMaterial({ color: '#ffb347', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+    this.shockRings = []
+    for (let i = 0; i < 4; i++) {
+      const ring = new THREE.Mesh(new THREE.RingGeometry(0.85, 1, 48), ringMat.clone())
+      ring.rotation.x = -Math.PI / 2
+      ring.visible = false
+      this.scene.add(ring)
+      this.shockRings.push({ mesh: ring, t: 1 })
+    }
+    this.flash = new THREE.PointLight('#ffa040', 0, 60, 1.6)
+    this.scene.add(this.flash)
+  }
+
+  processBooms() {
+    const list = this.pendingBooms
+    if (!list.length) return
+    this.pendingBooms = []
+    for (const b of list) {
+      if (b.prop) {
+        if (b.prop.gone) continue
+        const p = b.prop.body.position
+        const at = { x: p.x, y: p.y, z: p.z }
+        this.world.removeProp(b.prop)
+        this.explode(at.x, at.y, at.z, 1, true)
+        this.addCoins(5, true)
+        this.toast('💥 BOOM! +5')
+      } else this.explode(b.x, b.y, b.z, b.power, b.push)
+    }
+  }
+
+  explode(x, y, z, power = 1, push = true) {
+    const P = power
+    this.audio.explosion(P)
+    this.shake = Math.max(this.shake, 0.6 + P * 1.1)
+    this.vibrate(true)
+    // Fireball: opaque orange/red billows with a small additive hot core
+    const fire = ['#ffd166', '#ff9f1c', '#fb5607', '#e63900', '#b81d00']
+    for (let i = 0; i < 34 * P; i++) {
+      const a = Math.random() * Math.PI * 2
+      const e = Math.random() * 1.1
+      const sp = (3 + Math.random() * 6) * P
+      this.smoke.emit(x, y + 0.6, z, Math.cos(a) * Math.cos(e) * sp, Math.sin(e) * sp + 2.5, Math.sin(a) * Math.cos(e) * sp, fire[i % fire.length], (1.8 + Math.random() * 1.6) * Math.max(P, 0.5), 0.5 + Math.random() * 0.4, { drag: 3, gravity: -4, grow: 4.5, alpha: 0.95 })
+    }
+    for (let i = 0; i < 10 * P; i++) {
+      this.sparks.emit(x, y + 0.8, z, (Math.random() - 0.5) * 6, 2 + Math.random() * 3, (Math.random() - 0.5) * 6, '#ffb347', 1.4 * Math.max(P, 0.5), 0.35, { drag: 4, grow: 3 })
+    }
+    // Rolling black smoke column
+    for (let i = 0; i < 40 * P; i++) {
+      const a = Math.random() * Math.PI * 2
+      const sp = Math.random() * 4 * P
+      const g = 40 + Math.random() * 40
+      this.smoke.emit(x + Math.cos(a), y + 1 + Math.random() * 2, z + Math.sin(a), Math.cos(a) * sp, 2 + Math.random() * 3, Math.sin(a) * sp, `rgb(${g},${g},${g})`, 2.5 + Math.random() * 2, 2.2 + Math.random() * 1.6, { grow: 4, drag: 1.2, gravity: -0.6, alpha: 0.7 })
+    }
+    // Sparks and debris
+    this.sparks.burst(x, y + 0.5, z, Math.round(36 * P), ['#ffb703', '#ff7b00', '#ffe066'], 16 * P, { size: 0.25, life: 1.2, gravity: 16, up: 0.7, drag: 0.3 })
+    this.smoke.burst(x, y + 0.5, z, Math.round(24 * P), ['#3b2a20', '#5a5a5a', '#8b1e1e'], 12 * P, { size: 0.5, life: 2, gravity: 18, up: 0.8, drag: 0.2 })
+    // Shockwave ring + light flash
+    const ring = this.shockRings.find((r) => r.t >= 1) ?? this.shockRings[0]
+    ring.t = 0
+    ring.max = 10 + 14 * P
+    ring.mesh.position.set(x, 0.25, z)
+    ring.mesh.visible = true
+    this.flash.position.set(x, y + 3, z)
+    this.flash.intensity = 500 * P
+    if (!push) return
+    // Blast impulse on everything nearby (including the player's car)
+    const R = 13
+    for (const body of this.physics.bodies) {
+      if (body.mass <= 0) continue
+      const dx = body.position.x - x
+      const dy = body.position.y - y
+      const dz = body.position.z - z
+      const d = Math.hypot(dx, dy, dz)
+      if (d > R || d < 1e-3) continue
+      const f = (1 - d / R) * 13 * P
+      const n = 1 / Math.max(d, 0.5)
+      body.wakeUp()
+      const imp = new CANNON.Vec3(dx * n * f, (0.9 + dy * n * 0.3) * f, dz * n * f).scale(body.mass)
+      body.applyImpulse(imp)
+      if (body === this.car.chassis) body.angularVelocity.set((Math.random() - 0.5) * 3, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 3)
+    }
+    // Chain reaction
+    for (const p of this.world.props) {
+      if (p.kind !== 'barrel' || p.gone) continue
+      const d = Math.hypot(p.body.position.x - x, p.body.position.z - z)
+      if (d < 7.5) setTimeout(() => this.pendingBooms.push({ prop: p }), 120 + d * 40)
+    }
+  }
+
+  updateExplosionFx(dt) {
+    for (const r of this.shockRings) {
+      if (r.t >= 1) continue
+      r.t = Math.min(1, r.t + dt * 2.2)
+      const s = 1 + r.t * r.max
+      r.mesh.scale.set(s, s, s)
+      r.mesh.material.opacity = (1 - r.t) * 0.6
+      if (r.t >= 1) r.mesh.visible = false
+    }
+    if (this.flash.intensity > 0) this.flash.intensity = Math.max(0, this.flash.intensity - dt * 2500)
   }
 
   // ---------------- main loop ----------------
@@ -309,12 +421,14 @@ class Game {
       car.input = locked ? { throttle: 0, brake: 0, steer: 0, nitro: false, handbrake: true } : input
       car.update(dt)
       this.physics.step(1 / 60, dt, 4)
+      this.processBooms()
       car.sync(this.t)
       if (car.flipped || car.position.y < -5) this.resetCar()
       this.world.update(this.t, dt, car.position)
       this.updateEffects(dt)
       if (playing) this.updateGameplay(dt, input)
     }
+    this.updateExplosionFx(frozen ? 0 : dt)
     this.smoke.update(frozen ? 0 : dt)
     this.sparks.update(frozen ? 0 : dt)
     if (car) this.updateCamera(dt)
@@ -993,9 +1107,11 @@ class Game {
           <div class="setting"><label>📳 ${t('vibration')}</label>${seg('vibration', [[true, t('on')], [false, t('off')]], st.vibration)}</div>
           <div class="setting"><label>🌐 ${t('language')}</label>${seg('lang', LANGUAGES, getLanguage())}</div>
           <div class="setting"><label>🔒 ${t('privacy')}</label><a href="${PRIVACY_URL}" target="_blank" rel="noopener">${PRIVACY_URL.replace('https://', '')}</a></div>
+          <div class="setting"><label>📜 ${t('credits')}</label><button class="btn ghost small" id="sCredits">${t('credits')}</button></div>
         </div>
       </div>`, true)
     m.querySelector('#sBack').onclick = () => (from === 'pause' ? this.showPause() : this.showTitle())
+    m.querySelector('#sCredits').onclick = () => this.showCredits(from)
     m.querySelector('#sMusic').oninput = (e) => {
       st.music = +e.target.value
       this.audio.setVolumes(st.music, st.sfx)
@@ -1027,6 +1143,23 @@ class Game {
         this.showSettings(from)
       }
     })
+  }
+
+  showCredits(from) {
+    const rows = MODEL_CREDITS.map((c) => `<div>“${c.title}” — ${c.author} · <a href="${c.url}" target="_blank" rel="noopener">Sketchfab</a></div>`).join('')
+    const m = this.setMenu(`
+      <div class="screen">
+        <div class="screen-head">
+          <button class="btn ghost small" id="crBack">← ${t('back')}</button>
+          <h2>📜 ${t('credits')}</h2>
+        </div>
+        <div class="panel credits">
+          <p>3D models licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> (optimised for mobile):</p>
+          ${rows}
+          <p>three.js · cannon-es · Capacitor · Fredoka (OFL). Everything else — cities, cars, sounds and music — is generated by the game.</p>
+        </div>
+      </div>`, true)
+    m.querySelector('#crBack').onclick = () => this.showSettings(from)
   }
 
   showPause() {

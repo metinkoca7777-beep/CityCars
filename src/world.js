@@ -4,6 +4,7 @@ import * as CANNON from 'cannon-es'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { GRID } from './cities.js'
 import { buildLandmark, buildBalloons, Kit } from './landmarks.js'
+import { buildModelLandmark, buildModelBackdrop } from './models.js'
 import { mat, facadeMat, boxUV, mergeStatic, applyTimeOfDay } from './materials.js'
 import { mulberry32, hashString, pick } from './utils.js'
 import { buildCarMesh, CARS } from './cars.js'
@@ -111,6 +112,11 @@ export class World {
   }
 
   addBody(body) {
+    // cannon-es only refreshes a body's bounding box when it moves; static bodies positioned
+    // after construction keep a stale box at the origin, which breaks raycasts (ramps) and
+    // broadphase collisions (buildings). Refresh it explicitly.
+    body.aabbNeedsUpdate = true
+    body.updateAABB()
     this.physics.addBody(body)
     this.bodies.push(body)
     return body
@@ -333,6 +339,7 @@ export class World {
       lm.group.position.set(p.x, CURB, p.z)
       lm.group.rotation.y = p.def.ry ?? 0
       this.root.add(lm.group)
+      const firstBody = this.bodies.length
       const cos = Math.cos(p.def.ry ?? 0)
       const sin = Math.sin(p.def.ry ?? 0)
       for (const c of lm.colliders) {
@@ -384,7 +391,9 @@ export class World {
         flood.position.set(p.x + p.half * 0.8, 16, p.z + p.half * 0.8)
         this.root.add(flood)
       }
-      this.landmarks.push({ def: p.def, x: p.x, z: p.z, half: p.half, group: lm.group, beacon, discovered: false })
+      const entry = { def: p.def, x: p.x, z: p.z, half: p.half, group: lm.group, beacon, discovered: false, bodies: this.bodies.slice(firstBody), update: lm.update }
+      this.landmarks.push(entry)
+      this.upgradeLandmark(entry)
     }
     if (bedGeos.length) {
       const beds = new THREE.Mesh(mergeColored(bedGeos), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true }))
@@ -396,6 +405,46 @@ export class World {
       this.root.add(b.group)
       this.updaters.push(b.update)
     }
+  }
+
+  // Swap the procedural landmark for its detailed glTF model once it has loaded.
+  async upgradeLandmark(lm) {
+    let res
+    try {
+      res = await buildModelLandmark(lm.def.id, this.night)
+    } catch (e) {
+      console.warn('model failed', lm.def.id, e)
+      return
+    }
+    if (!res || this.disposed) return
+    const { group, update, cfg } = res
+    group.position.copy(lm.group.position)
+    group.rotation.y = lm.group.rotation.y
+    this.root.remove(lm.group)
+    lm.group.traverse((o) => o.geometry?.dispose())
+    this.root.add(group)
+    lm.group = group
+    if (lm.update) this.updaters.splice(this.updaters.indexOf(lm.update), 1)
+    if (update) this.updaters.push(update)
+    group.updateMatrixWorld(true)
+    if (cfg.col !== 'keep') {
+      for (const b of lm.bodies) {
+        this.physics.removeBody(b)
+        this.bodies.splice(this.bodies.indexOf(b), 1)
+      }
+      const box = new THREE.Box3().setFromObject(group.children[0])
+      const size = box.getSize(new THREE.Vector3())
+      const c = box.getCenter(new THREE.Vector3())
+      const k = cfg.shrink ?? 0.9
+      const h = Math.min(size.y, 60)
+      if (cfg.col === 'box') this.staticBox(c.x, 0, c.z, size.x * k, h, size.z * k)
+      else if (cfg.col === 'cyl') this.staticCyl(c.x, c.z, (Math.max(size.x, size.z) / 2) * k, h)
+      else if (cfg.col === 'legs') {
+        const r = size.x * 0.07
+        for (const sx of [-1, 1]) for (const sz of [-1, 1]) this.staticCyl(c.x + sx * (size.x / 2 - r * 1.6), c.z + sz * (size.z / 2 - r * 1.6), r, 20)
+      }
+    }
+    lm.beacon.userData.baseY = this.landmarkHeight(group) + 8
   }
 
   landmarkHeight(group) {
@@ -545,31 +594,57 @@ export class World {
     }
   }
 
+  // Wedge-shaped jump ramp whose low edge sits flush on the ground; it rises
+  // towards heading `ry` (0 = +z). Returns the world position of the lip.
+  addRamp(x, z, ry, { w = 7, L = 11, H = 2.6, y = 0 } = {}) {
+    const hw = w / 2
+    const V = [[-hw, 0, 0], [hw, 0, 0], [hw, 0, L], [-hw, 0, L], [hw, H, L], [-hw, H, L]]
+    const faces = [[0, 1, 2, 3], [2, 4, 5, 3], [0, 5, 4, 1], [1, 4, 2], [0, 3, 5]]
+    const shape = new CANNON.ConvexPolyhedron({ vertices: V.map((v) => new CANNON.Vec3(...v)), faces })
+    const body = new CANNON.Body({ mass: 0, shape })
+    body.position.set(x, y, z)
+    body.quaternion.setFromEuler(0, ry, 0)
+    this.addBody(body)
+    // Visual: slope with chevrons + painted sides
+    const pos = []
+    const uv = []
+    const tri = (a, b, c, ua = [0, 0], ub = [0, 0], uc = [0, 0]) => {
+      pos.push(...V[a], ...V[b], ...V[c])
+      uv.push(...ua, ...ub, ...uc)
+    }
+    tri(0, 5, 4, [0, 0], [0, 1], [1, 1])
+    tri(0, 4, 1, [0, 0], [1, 1], [1, 0])
+    tri(3, 2, 4)
+    tri(3, 4, 5)
+    tri(1, 4, 2)
+    tri(0, 3, 5)
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2))
+    geo.computeVertexNormals()
+    const mesh = new THREE.Mesh(geo, rampMaterial())
+    mesh.castShadow = mesh.receiveShadow = true
+    mesh.position.set(x, y, z)
+    mesh.rotation.y = ry
+    this.root.add(mesh)
+    return { x: x + Math.sin(ry) * L, y: y + H, z: z + Math.cos(ry) * L, dx: Math.sin(ry), dz: Math.cos(ry), bx: x, bz: z, ry }
+  }
+
   buildPlayground(x, z) {
-    // Jump ramps + a sign. The knockable props are created in buildProps().
-    const rampMat = mat('#ff7a1a', { emissive: '#ff5a00', ei: 0.25 })
-    const stripe = mat('#ffffff')
-    for (const [dx, dz, ry] of [[0, -14, Math.PI], [-16, 10, -Math.PI / 2]]) {
-      const len = 12
-      const ang = 0.26
-      const group = new THREE.Group()
-      const m = new THREE.Mesh(new THREE.BoxGeometry(7, 0.6, len), rampMat)
-      m.castShadow = m.receiveShadow = true
-      group.add(m)
-      for (let i = 0; i < 3; i++) {
-        const s = new THREE.Mesh(new THREE.BoxGeometry(7.05, 0.62, 0.6), stripe)
-        s.position.z = -len / 2 + 2 + i * 4
-        group.add(s)
-      }
-      const cy = Math.sin(ang) * len * 0.5 - 0.15
-      group.position.set(x + dx, CURB + cy, z + dz)
-      group.rotation.set(-ang, ry, 0, 'YXZ')
-      this.root.add(group)
-      const body = new CANNON.Body({ mass: 0, shape: new CANNON.Box(new CANNON.Vec3(3.5, 0.3, len / 2)) })
-      body.position.set(x + dx, CURB + cy, z + dz)
-      const q = group.quaternion
-      body.quaternion.set(q.x, q.y, q.z, q.w)
-      this.addBody(body)
+    // Ramps sit on the block edge so you can hit them at full speed straight off the road
+    // and fly into the playground (crates, bowling pins, barrels).
+    this.ramps = []
+    this.ramps.push(this.addRamp(x, z - BLOCK / 2 + 0.5, 0, { y: CURB }))
+    this.ramps.push(this.addRamp(x + BLOCK / 2 - 0.5, z + 18, -Math.PI / 2, { y: CURB, H: 2.2 }))
+    // Stunt ramps in the middle of a few outer roads (traffic avoids those segments).
+    const outer = this.segments.filter((sg) => (sg.horiz ? sg.a.j === 0 || sg.a.j === GRID : sg.a.i === 0 || sg.a.i === GRID))
+    const picks = [outer[1], outer[Math.floor(outer.length / 2) + 2], outer[outer.length - 3]].filter(Boolean)
+    for (const sg of picks) {
+      sg.blocked = true
+      const ry = Math.atan2(sg.b.x - sg.a.x, sg.b.z - sg.a.z)
+      const mx = (sg.a.x + sg.b.x) / 2 - Math.sin(ry) * 8
+      const mz = (sg.a.z + sg.b.z) / 2 - Math.cos(ry) * 8
+      this.ramps.push(this.addRamp(mx, mz, ry, { w: 9, L: 12, H: 3 }))
     }
   }
 
@@ -590,6 +665,7 @@ export class World {
           const px = s.a.x + dirx * d + ox
           const pz = s.a.z + dirz * d + oz
           if (this.isInPlaza(px, pz, 1)) continue
+          if ((this.ramps ?? []).some((r) => Math.hypot(px - (r.bx + r.x) / 2, pz - (r.bz + r.z) / 2) < 10)) continue
           if (Math.abs(px) > HALF + 1 || Math.abs(pz) > HALF + 1) continue
           if ((Math.round(d / 15) + (side > 0 ? 1 : 0)) % 2 === 0) lampSpots.push([px, pz, Math.atan2(-ox, -oz)])
           else if (rng() < 0.75) this.treeSpots.push([px, pz])
@@ -771,6 +847,15 @@ export class World {
 
   buildBackdrops() {
     for (const b of this.city.backdrops ?? []) {
+      buildModelBackdrop(b.type).then((model) => {
+        if (!model || this.disposed) return
+        model.position.set(...b.pos)
+        model.rotation.y = b.ry ?? 0
+        model.traverse((o) => (o.castShadow = false))
+        const old = this.backdropGroups?.[b.type]
+        if (old) this.root.remove(old)
+        this.root.add(model)
+      }).catch(() => {})
       const lm = buildLandmark(b.type)
       lm.group.position.set(...b.pos)
       lm.group.rotation.y = b.ry ?? 0
@@ -778,6 +863,7 @@ export class World {
         o.castShadow = false
       })
       this.root.add(lm.group)
+      ;(this.backdropGroups ??= {})[b.type] = lm.group
     }
   }
 
@@ -804,10 +890,34 @@ export class World {
     const b1 = new THREE.SphereGeometry(1.62, 16, 12, 0, Math.PI / 2)
     const b2 = new THREE.SphereGeometry(1.62, 16, 12, Math.PI, Math.PI / 2)
     kind('ball', mergeColored([[ball, '#ffffff'], [b1, '#2a9df4'], [b2, '#ff3b30']]), () => new CANNON.Sphere(1.6), 3)
+    // Explosive barrels (red with a hazard stripe)
+    const barrel = new THREE.CylinderGeometry(0.55, 0.55, 1.4, 14)
+    const band1 = new THREE.CylinderGeometry(0.57, 0.57, 0.2, 14)
+    band1.translate(0, 0.3, 0)
+    const band2 = new THREE.CylinderGeometry(0.57, 0.57, 0.12, 14)
+    band2.translate(0, -0.35, 0)
+    const lid = new THREE.CylinderGeometry(0.45, 0.45, 0.06, 14)
+    lid.translate(0, 0.72, 0)
+    kind('barrel', mergeColored([[barrel, '#d62828'], [band1, '#ffd23f'], [band2, '#222222'], [lid, '#7a1010']]), () => new CANNON.Cylinder(0.55, 0.55, 1.4, 10), 3)
 
     for (let row = 0; row < 4; row++) for (let i = 0; i <= row; i++) kinds.pin.items.push([px + 10 + (i - row / 2) * 1.6, CURB + 1.06, pz + 6 + row * 1.5])
     for (let layer = 0; layer < 4; layer++) for (let i = 0; i < 4 - layer; i++) kinds.crate.items.push([px - 12 + (i + layer / 2) * 1.65, CURB + 0.8 + layer * 1.62, pz - 2])
     kinds.ball.items.push([px + 4, CURB + 1.7, pz - 8])
+    for (const [dx, dz] of [[-14, 8], [-12.6, 8.8], [-13.4, 9.9], [14, -14], [15.2, -13.2], [6, 20]]) kinds.barrel.items.push([px + dx, CURB + 0.71, pz + dz])
+    // Barrel clusters on street corners around the city
+    const corners = [...this.nodes].sort(() => rng() - 0.5)
+    let placed = 0
+    for (const nd of corners) {
+      if (placed >= 9) break
+      const sx = rng() < 0.5 ? -1 : 1
+      const sz = rng() < 0.5 ? -1 : 1
+      const x = nd.x + sx * (ROAD / 2 + 2.2)
+      const z = nd.z + sz * (ROAD / 2 + 2.2)
+      if (Math.abs(x) > HALF || Math.abs(z) > HALF || this.isInPlaza(x, z, 2)) continue
+      if (Math.hypot(x - this.spawn.x, z - this.spawn.z) < 25) continue
+      kinds.barrel.items.push([x, CURB + 0.71, z], [x + sx * 1.25, CURB + 0.71, z + sz * 0.3])
+      placed++
+    }
     for (let i = 0; i < 26; i++) {
       const sg = pick(rng, this.segments)
       const t = 0.3 + rng() * 0.4
@@ -832,17 +942,46 @@ export class World {
         body.sleepSpeedLimit = 0.3
         body.sleepTimeLimit = 0.5
         this.addBody(body)
-        this.props.push({ mesh, index: i, body, kind: name, hit: false })
+        this.props.push({ mesh, index: i, body, kind: name, hit: false, home: [x, y, z] })
       })
     }
     this.syncProps(true)
+  }
+
+  // Remove a prop (exploded barrel) and bring it back later.
+  removeProp(p, respawn = 25) {
+    if (p.gone) return
+    p.gone = true
+    p.hidden = false
+    this.physics.removeBody(p.body)
+    setTimeout(() => {
+      if (this.disposed) return
+      p.body.position.set(...p.home)
+      p.body.quaternion.set(0, 0, 0, 1)
+      p.body.velocity.set(0, 0, 0)
+      p.body.angularVelocity.set(0, 0, 0)
+      this.physics.addBody(p.body)
+      p.gone = false
+      p.hit = false
+      this.syncProps(true)
+    }, respawn * 1000)
   }
 
   syncProps(force = false) {
     const m = new THREE.Matrix4()
     const one = new THREE.Vector3(1, 1, 1)
     const dirty = new Set()
+    const zero = new THREE.Vector3()
     for (const p of this.props) {
+      if (p.gone) {
+        if (!p.hidden) {
+          m.compose(p.body.position, p.body.quaternion, zero)
+          p.mesh.setMatrixAt(p.index, m)
+          dirty.add(p.mesh)
+          p.hidden = true
+        }
+        continue
+      }
       if (!force && p.body.sleepState === CANNON.Body.SLEEPING) continue
       m.compose(p.body.position, p.body.quaternion, one)
       p.mesh.setMatrixAt(p.index, m)
@@ -856,7 +995,7 @@ export class World {
     const rng = this.rng
     const spots = []
     for (const s of this.segments) {
-      if (rng() < 0.45) continue
+      if (rng() < 0.45 || s.blocked) continue
       const lane = (rng() < 0.5 ? -1 : 1) * LANE
       for (const t of [0.3, 0.5, 0.7]) {
         const x = s.a.x + (s.b.x - s.a.x) * t + (s.horiz ? 0 : lane)
@@ -864,10 +1003,13 @@ export class World {
         spots.push([x, 1.2, z])
       }
     }
-    // Bonus coins floating above the jump ramps
-    const { x: px, z: pz } = this.playground
-    for (let i = 0; i < 5; i++) spots.push([px, 5 + Math.sin((i / 4) * Math.PI) * 3, pz - 22 - i * 3])
-    for (let i = 0; i < 5; i++) spots.push([px - 24 - i * 3, 5 + Math.sin((i / 4) * Math.PI) * 3, pz + 10])
+    // Bonus coins along the flight path after every ramp
+    for (const r of this.ramps ?? []) {
+      for (let i = 0; i < 6; i++) {
+        const d = 3 + i * 3.2
+        spots.push([r.x + r.dx * d, r.y + 1.6 + Math.sin((i / 5) * Math.PI) * 2.6, r.z + r.dz * d])
+      }
+    }
     const geo = new THREE.CylinderGeometry(0.75, 0.75, 0.18, 18)
     geo.rotateX(Math.PI / 2)
     const coinMat = new THREE.MeshStandardMaterial({ color: '#ffcc33', metalness: 0.8, roughness: 0.25, emissive: '#ffaa00', emissiveIntensity: 0.55 })
@@ -951,6 +1093,7 @@ export class World {
     const palette = this.city.parked ?? ['#e63946', '#f1faee', '#457b9d', '#2a9d8f', '#e9c46a', '#8d99ae', '#111111', '#f4a261']
     for (let i = 0; i < count; i++) {
       const seg = this.segments[Math.floor(rng() * this.segments.length)]
+      if (seg.blocked) continue
       const from = rng() < 0.5 ? seg.a : seg.b
       const to = from === seg.a ? seg.b : seg.a
       if (Math.hypot(from.x - this.spawn.x, from.z - this.spawn.z) < 30) continue
@@ -967,6 +1110,11 @@ export class World {
       car.heading = Math.atan2(to.x - from.x, to.z - from.z)
       this.traffic.push(car)
     }
+  }
+
+  segmentBlocked(a, b) {
+    if (!this.blockedKeys) this.blockedKeys = new Set(this.segments.filter((s) => s.blocked).flatMap((s) => [`${s.a.i},${s.a.j}-${s.b.i},${s.b.j}`, `${s.b.i},${s.b.j}-${s.a.i},${s.a.j}`]))
+    return this.blockedKeys.has(`${a.i},${a.j}-${b.i},${b.j}`)
   }
 
   lanePoint(from, to, t, out) {
@@ -1006,7 +1154,7 @@ export class World {
       car.speed += Math.sign(target - car.speed) * Math.min(Math.abs(target - car.speed), (blocked ? 18 : 5) * dt)
       car.t += (car.speed * dt) / segLen
       if (car.t >= 1) {
-        const opts = car.to.links.filter((n) => n !== car.from)
+        const opts = car.to.links.filter((n) => n !== car.from && !this.segmentBlocked(car.to, n))
         const next = opts.length ? opts[Math.floor(this.rng() * opts.length)] : car.from
         car.from = car.to
         car.to = next
@@ -1060,6 +1208,7 @@ export class World {
   }
 
   dispose() {
+    this.disposed = true
     for (const b of this.bodies) this.physics.removeBody(b)
     this.scene.remove(this.root)
     this.root.traverse((o) => {
@@ -1126,6 +1275,37 @@ function makeWaterTexture() {
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping
   tex.colorSpace = THREE.SRGBColorSpace
   return tex
+}
+
+let rampMat
+function rampMaterial() {
+  if (rampMat) return rampMat
+  const c = document.createElement('canvas')
+  c.width = 128
+  c.height = 256
+  const g = c.getContext('2d')
+  g.fillStyle = '#ff7a1a'
+  g.fillRect(0, 0, 128, 256)
+  g.fillStyle = '#ffffff'
+  for (let i = 0; i < 4; i++) {
+    const y = 230 - i * 62
+    g.beginPath()
+    g.moveTo(14, y)
+    g.lineTo(64, y - 34)
+    g.lineTo(114, y)
+    g.lineTo(114, y - 16)
+    g.lineTo(64, y - 50)
+    g.lineTo(14, y - 16)
+    g.closePath()
+    g.fill()
+  }
+  g.fillStyle = '#1d1d1d'
+  g.fillRect(0, 0, 8, 256)
+  g.fillRect(120, 0, 8, 256)
+  const tex = new THREE.CanvasTexture(c)
+  tex.colorSpace = THREE.SRGBColorSpace
+  rampMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, emissive: '#ff5a00', emissiveIntensity: 0.15 })
+  return rampMat
 }
 
 let radialTex

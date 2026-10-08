@@ -260,6 +260,16 @@ export class AudioEngine {
     if (v > 0.5) this.noiseHit(0.4, 5000, 0.08 * v, 0.03, 'highpass')
   }
 
+  explosion(power = 1) {
+    const p = Math.min(1.2, power)
+    this.tone(75, 1.1, 'sine', 0.7 * p, 0, this.sfxBus, 26)
+    this.tone(140, 0.35, 'triangle', 0.3 * p, 0, this.sfxBus, 40)
+    this.noiseHit(1.4, 700, 0.6 * p, 0, 'lowpass')
+    this.noiseHit(1.9, 180, 0.45 * p, 0.06, 'lowpass')
+    this.noiseHit(0.5, 3500, 0.14 * p, 0.02, 'highpass')
+    for (let i = 0; i < 6; i++) this.noiseHit(0.06, 2500 + Math.random() * 3000, 0.06 * p, 0.25 + Math.random() * 0.8, 'bandpass', 3)
+  }
+
   thump(v = 0.5) {
     this.tone(160 + Math.random() * 80, 0.12, 'triangle', 0.25 * v, 0, this.sfxBus, 70)
     this.noiseHit(0.08, 1800, 0.12 * v, 0, 'bandpass', 2)
