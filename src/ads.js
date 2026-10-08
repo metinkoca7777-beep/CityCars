@@ -1,18 +1,22 @@
 // AdMob integration (Android via Capacitor). On the web every call is a harmless no-op
 // so the game can be played and tested in a browser.
 //
-// BEFORE PUBLISHING: replace the TEST ids below with your own ad unit ids from
-// https://apps.admob.com and set the APPLICATION_ID in android/app/src/main/AndroidManifest.xml.
+// Ad unit ids belong to the CityCars app in AdMob (publisher pub-4357371903036713).
+// The matching APPLICATION_ID is set in android/app/src/main/AndroidManifest.xml.
 import { Capacitor } from '@capacitor/core'
 
 export const AD_IDS = {
-  // Google's official test units — safe to use during development.
-  banner: 'ca-app-pub-3940256099942544/9214589741',
-  interstitial: 'ca-app-pub-3940256099942544/1033173712',
-  rewarded: 'ca-app-pub-3940256099942544/5224354917',
+  banner: 'ca-app-pub-4357371903036713/6981825759',
+  interstitial: 'ca-app-pub-4357371903036713/8594201036',
+  // "Rewarded interstitial" unit (Ödüllü Geçiş). Shown only when the player taps a
+  // "watch ad" button, which satisfies AdMob's opt-in requirement for this format.
+  rewarded: 'ca-app-pub-4357371903036713/1350135832',
 }
-// Flip to false once the real ad unit ids are in place.
-const TESTING = true
+// 'interstitial' = rewarded interstitial unit, 'video' = classic rewarded unit.
+const REWARD_FORMAT = 'interstitial'
+// Real ads. To test on your own phone without risking the account, add the device
+// under AdMob → Settings → Test devices (or temporarily set this to true).
+const TESTING = false
 
 const native = Capacitor.isNativePlatform()
 let AdMob = null
@@ -48,7 +52,8 @@ async function preloadInterstitial() {
 
 async function preloadRewarded() {
   try {
-    await AdMob.prepareRewardVideoAd({ adId: AD_IDS.rewarded, isTesting: TESTING })
+    if (REWARD_FORMAT === 'interstitial') await AdMob.prepareRewardInterstitialAd({ adId: AD_IDS.rewarded, isTesting: TESTING })
+    else await AdMob.prepareRewardVideoAd({ adId: AD_IDS.rewarded, isTesting: TESTING })
   } catch {}
 }
 
@@ -88,7 +93,7 @@ export async function showRewarded() {
   }
   if (!ready) return false
   try {
-    const reward = await AdMob.showRewardVideoAd()
+    const reward = REWARD_FORMAT === 'interstitial' ? await AdMob.showRewardInterstitialAd() : await AdMob.showRewardVideoAd()
     preloadRewarded()
     return !!reward
   } catch {

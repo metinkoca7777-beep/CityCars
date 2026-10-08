@@ -34,7 +34,7 @@ Klavye: WASD/oklar sür · Boşluk drift · Shift nitro · H korna · R sıfırl
 - **AdMob:** [apps.admob.com](https://apps.admob.com)'da uygulama + 3 reklam birimi (Banner, Geçiş, Ödüllü) oluştur:
   - `android/app/src/main/AndroidManifest.xml` → `com.google.android.gms.ads.APPLICATION_ID` değerini kendi **Uygulama Kimliğin** yap.
   - `src/ads.js` → `AD_IDS` içine kendi reklam birimi kimliklerini yaz ve `TESTING = false` yap.
-  - Şu an Google'ın **test** kimlikleri var; bu haliyle gerçek gelir gelmez.
+  - ✅ Yapıldı: CityCars AdMob kimlikleri (uygulama, banner, geçiş, ödüllü geçiş) eklendi ve test modu kapatıldı. Kendi telefonunda test ederken cihazını AdMob → Ayarlar → Test cihazları bölümüne ekle; kendi reklamlarına tıklama.
 - **Gizlilik politikası:** `public/privacy.html` hazır. Bir adreste yayınla (ör. GitHub Pages) ve `src/main.js` içindeki `PRIVACY_URL`'yi güncelle; aynı adresi Play Console'a gir.
 
 ### 2) Derleme
