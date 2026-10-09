@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1020" />
+    <meta name="description" content="CityCars: World Tour — drive a toy car through Istanbul, Paris, London, New York, Tokyo and more famous tourist cities." />
+    <title>CityCars: World Tour</title>
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+
+    <!-- In-game HUD -->
+    <div id="hud" class="hidden">
+      <div class="hud-top-left">
+        <div class="pill" id="hudCoins"><span class="coin-ico"></span><b id="coinCount">0</b></div>
+        <div class="pill" id="hudLandmarks">📍 <b id="lmCount">0/0</b></div>
+        <div class="pill small" id="hudNearby"></div>
+      </div>
+      <div class="hud-top-center">
+        <div id="raceTimer" class="hidden"></div>
+        <div id="raceCp" class="hidden"></div>
+      </div>
+      <div class="hud-top-right">
+        <canvas id="minimap" width="160" height="160"></canvas>
+        <div class="hud-buttons">
+          <button class="round-btn" id="btnCam" aria-label="camera">🎥</button>
+          <button class="round-btn" id="btnRace" aria-label="race">🏁</button>
+          <button class="round-btn" id="btnPause" aria-label="pause">⏸</button>
+        </div>
+      </div>
+      <div class="hud-bottom-center">
+        <div id="speedo"><b id="speedVal">0</b><span id="speedUnit">km/h</span></div>
+        <div id="nitroBar"><div id="nitroFill"></div></div>
+      </div>
+      <div id="countdown" class="hidden"></div>
+      <div id="nitroVignette"></div>
+
+      <!-- Touch controls -->
+      <div id="touch" class="hidden">
+        <div id="steerPad"><div class="pad-arrow left">◀</div><div id="steerKnob"></div><div class="pad-arrow right">▶</div></div>
+        <div id="rightPad">
+          <button id="btnHorn" class="t-btn small">📯</button>
+          <button id="btnNitro" class="t-btn nitro">🔥</button>
+          <button id="btnDrift" class="t-btn small">↯</button>
+          <button id="btnBrake" class="t-btn brake">▼</button>
+          <button id="btnGas" class="t-btn gas">▲</button>
+        </div>
+      </div>
+      <div id="keysHint" class="hidden"></div>
+    </div>
+
+    <!-- Landmark discovered card -->
+    <div id="discoverCard" class="hidden">
+      <div class="dc-badge">📸</div>
+      <div class="dc-body">
+        <div class="dc-title" id="dcTitle"></div>
+        <div class="dc-name" id="dcName"></div>
+        <div class="dc-fact" id="dcFact"></div>
+      </div>
+      <div class="dc-reward" id="dcReward">+100</div>
+    </div>
+
+    <div id="toasts"></div>
+
+    <!-- Menus -->
+    <div id="menu" class="hidden"></div>
+
+    <div id="loading">
+      <div class="logo">
+        <div class="logo-car">🚗</div>
+        <div class="logo-title">CityCars</div>
+        <div class="logo-sub">World Tour</div>
+      </div>
+      <div class="spinner"></div>
+      <div id="loadingText">Loading…</div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

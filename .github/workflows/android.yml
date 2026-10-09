@@ -1,0 +1,68 @@
+name: Android build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web game
+        run: npm run build
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: citycars-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+
+      # Signed release bundle for Google Play. Needs these repository secrets:
+      # ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+      - name: Build signed release AAB
+        if: ${{ github.event_name != 'pull_request' }}
+        working-directory: android
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then echo "No signing secrets configured — skipping release build."; exit 0; fi
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          cat > keystore.properties <<PROPS
+          storeFile=$RUNNER_TEMP/upload.jks
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          PROPS
+          ./gradlew bundleRelease --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ github.event_name != 'pull_request' }}
+        with:
+          name: citycars-release-aab
+          path: android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: ignore

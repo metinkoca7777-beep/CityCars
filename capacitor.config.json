@@ -1,0 +1,11 @@
+{
+  "appId": "com.kolomp.citycars",
+  "appName": "CityCars: World Tour",
+  "webDir": "dist",
+  "android": {
+    "backgroundColor": "#0b1020"
+  },
+  "plugins": {
+    "AdMob": {}
+  }
+}
