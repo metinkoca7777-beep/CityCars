@@ -436,7 +436,14 @@ class Game {
       const locked = !playing || (this.race && !this.race.started)
       car.input = locked ? { throttle: 0, brake: 0, steer: 0, nitro: false, handbrake: true } : input
       car.update(dt)
-      this.physics.step(1 / 60, dt, 4)
+      // Advance physics by exactly this frame's time, in equal sub-steps of at most 1/60 s.
+      // A fixed 1/60 s step with an accumulator moves the car 0, 1 or 2 steps per frame at
+      // 50/90/120 Hz, which reads as stutter; equal sub-steps keep motion smooth at any rate.
+      const n = Math.max(1, Math.ceil(dt * 60 - 0.05))
+      for (let k = 0; k < n; k++) {
+        car.applyForces()
+        this.physics.step(dt / n)
+      }
       this.processBooms()
       car.sync(this.t)
       if (car.flipped || car.position.y < -5) this.resetCar()
