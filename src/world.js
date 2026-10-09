@@ -20,6 +20,8 @@ const LANE = 3.4
 export const roadLine = (i) => -HALF + i * CELL
 export const blockCenter = (c) => -HALF + c * CELL + CELL / 2
 
+const shadowCenter = new THREE.Vector3()
+
 export class World {
   constructor(city, scene, physics, quality, renderer) {
     this.renderer = renderer
@@ -222,6 +224,11 @@ export class World {
     const sc = sun.shadow.camera
     sc.left = sc.bottom = -70
     sc.right = sc.top = 70
+    // The shadow camera follows the car; snapping it to whole shadow-map texels (in light
+    // space) keeps shadow edges from crawling and shimmering while driving.
+    this.shadowTexel = 140 / sm
+    this.lightRot = new THREE.Matrix4().lookAt(sunDir, new THREE.Vector3(), new THREE.Vector3(0, 1, 0))
+    this.lightRotInv = this.lightRot.clone().invert()
     sc.near = 1
     sc.far = 400
     sun.shadow.bias = -0.0006
@@ -1246,8 +1253,13 @@ export class World {
     for (const cp of this.checkpoints) if (cp.mesh.visible) cp.mesh.rotation.z = t * 0.8
     this.updateTraffic(dt, playerPos)
     if (playerPos) {
-      this.sun.position.set(playerPos.x + this.sunDir.x * 120, this.sunDir.y * 120, playerPos.z + this.sunDir.z * 120)
-      this.sun.target.position.set(playerPos.x, 0, playerPos.z)
+      const c = shadowCenter.set(playerPos.x, 0, playerPos.z).applyMatrix4(this.lightRotInv)
+      const s = this.shadowTexel
+      c.x = Math.round(c.x / s) * s
+      c.y = Math.round(c.y / s) * s
+      c.applyMatrix4(this.lightRot)
+      this.sun.target.position.copy(c)
+      this.sun.position.copy(this.sunDir).multiplyScalar(120).add(c)
       this.sky.position.set(playerPos.x, this.sky.isMesh && this.sky.material.uniforms?.turbidity ? 0 : 0, playerPos.z)
       if (this.stars) this.stars.position.set(playerPos.x, 0, playerPos.z)
     }

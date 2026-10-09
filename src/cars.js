@@ -155,6 +155,8 @@ export function buildCarMesh(def, merged = false) {
 }
 
 // ---------------- player vehicle ----------------
+const downforceV = new CANNON.Vec3()
+
 export class PlayerCar {
   constructor(def, scene, physics) {
     this.def = def
@@ -287,8 +289,9 @@ export class PlayerCar {
     const c = this.chassis
     const grounded = v.wheelInfos.some((w) => w.isInContact)
     this.grounded = grounded
-    if (grounded) c.applyForce(new CANNON.Vec3(0, -Math.min(speed * speed, 1600) * 1.2, 0))
-    else {
+    // Applied before every physics sub-step by applyForces() (cannon clears forces after each step).
+    this.downforce = grounded ? -Math.min(speed * speed, 1600) * 1.2 : 0
+    if (!grounded) {
       c.angularVelocity.x *= 1 - dt * 1.5
       c.angularVelocity.z *= 1 - dt * 1.5
     }
@@ -301,6 +304,10 @@ export class PlayerCar {
 
     for (let i = 0; i < 4; i++) this.skidding[i] = v.wheelInfos[i].isInContact && v.wheelInfos[i].skidInfo < 0.6 && Math.abs(speed) > 4
     if (inp.handbrake && Math.abs(speed) > 6) this.skidding[2] = this.skidding[3] = v.wheelInfos[2].isInContact
+  }
+
+  applyForces() {
+    if (this.downforce) this.chassis.applyForce(downforceV.set(0, this.downforce, 0))
   }
 
   // Called after the physics step to sync visuals.
