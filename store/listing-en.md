@@ -98,8 +98,8 @@ First release of CityCars: World Tour!
 | App category | **Games → Racing** (alternative: Casual) |
 | Tags (pick up to 5) | Driving, Open world, Casual, Racing, Simulation |
 | Contact email | metin@kolomp.com |
-| Website | your website (it must host `app-ads.txt` for AdMob) |
-| Privacy policy URL | the published copy of `public/privacy.html` |
+| Website | https://citycars-xi.vercel.app (serves `app-ads.txt` from `public/app-ads.txt`) |
+| Privacy policy URL | https://citycars-xi.vercel.app/privacy.html |
 | Contains ads | **Yes** |
 | In-app purchases | No |
 

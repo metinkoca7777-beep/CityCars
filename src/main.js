@@ -24,7 +24,7 @@ import { isMobile, clamp, damp, formatTime } from './utils.js'
 import { MODEL_CREDITS } from './credits.js'
 
 const $ = (s) => document.querySelector(s)
-const PRIVACY_URL = 'https://metinkoca7777-beep.github.io/citycars/privacy.html'
+const PRIVACY_URL = 'https://citycars-xi.vercel.app/privacy.html'
 const DISCOVER_REWARD = 100
 const ALL_DISCOVERED_BONUS = 250
 const FREE_COINS = 150

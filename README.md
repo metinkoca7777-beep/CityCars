@@ -35,7 +35,7 @@ Klavye: WASD/oklar sür · Boşluk drift · Shift nitro · H korna · R sıfırl
   - `android/app/src/main/AndroidManifest.xml` → `com.google.android.gms.ads.APPLICATION_ID` değerini kendi **Uygulama Kimliğin** yap.
   - `src/ads.js` → `AD_IDS` içine kendi reklam birimi kimliklerini yaz ve `TESTING = false` yap.
   - ✅ Yapıldı: CityCars AdMob kimlikleri (uygulama, banner, geçiş, ödüllü geçiş) eklendi ve test modu kapatıldı. Kendi telefonunda test ederken cihazını AdMob → Ayarlar → Test cihazları bölümüne ekle; kendi reklamlarına tıklama.
-- **Gizlilik politikası:** `public/privacy.html` hazır. Bir adreste yayınla (ör. GitHub Pages) ve `src/main.js` içindeki `PRIVACY_URL`'yi güncelle; aynı adresi Play Console'a gir.
+- **Web / gizlilik / app-ads.txt:** Oyun Vercel'de yayında: https://citycars-xi.vercel.app (`main`'e her push'ta otomatik deploy). Gizlilik politikası: https://citycars-xi.vercel.app/privacy.html · AdMob doğrulaması: https://citycars-xi.vercel.app/app-ads.txt (`public/app-ads.txt`). Play Console'da "Web sitesi" olarak https://citycars-xi.vercel.app girin.
 
 ### 2) Derleme
 Android Studio (JDK 21, Android SDK 36) ile:
