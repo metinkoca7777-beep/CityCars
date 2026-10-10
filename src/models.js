@@ -11,27 +11,49 @@ import { mat, mergeStatic } from './materials.js'
 const PI = Math.PI
 
 // fit: which dimension `size` (metres) applies to — 'height', 'width' (x) or 'max' (largest horizontal side).
-// col: 'keep' = keep the procedural colliders, 'box' | 'cyl' | 'legs' = derive from the model's bounds.
+// col: 'keep' = keep the procedural colliders, 'box' | 'cyl' | 'legs' = derive from the model's bounds,
+//      'each' = one cylinder per copy, 'none' = no colliders (flat sites you can drive across).
+// copies: [x, z, size, rotation, fileIndex] — several instances, optionally of different `files`.
 // base: extra procedural parts drawn under/around the model (islands, pedestals...).
 export const MODELS = {
+  agraFort: { fit: 'max', size: 58, col: 'box', shrink: 0.9 },
   arcTriomphe: { fit: 'width', size: 31, col: 'keep', detail: 'stone', tint: '#efe3c8' },
   bigBen: { fit: 'height', size: 72, col: 'box', shrink: 0.9 },
+  blueMosque: { fit: 'max', size: 58, col: 'box', shrink: 0.75, tint: '#d9d4cb', detail: 'stone' },
+  brandenburg: { fit: 'width', size: 56, col: 'keep' },
   burjAlArab: { fit: 'height', size: 64, y: 2, col: 'keep', base: 'island' },
   burjKhalifa: { fit: 'height', size: 180, col: 'box', shrink: 0.7 },
+  canalHouses: { files: ['canalHouse1', 'canalHouse2', 'canalHouse3'], fit: 'height', copies: [[-18, 0, 17, 0], [0, 0, 19, 0, 1], [18, 0, 18, 0, 2]], col: 'each', shrink: 0.8 },
   christRedeemer: { fit: 'height', size: 19, y: 30, col: 'keep', base: 'corcovado', detail: 'marble' },
+  citadelMosque: { fit: 'max', size: 54, col: 'box', shrink: 0.75 },
   colosseum: { fit: 'max', size: 56, col: 'cyl', shrink: 0.92 },
   eiffel: { fit: 'height', size: 98, col: 'legs', tint: '#9c7a5c', glow: '#ffb257' },
   empireState: { fit: 'height', size: 132, col: 'box', shrink: 0.85, glow: '#9fc4ff', detail: 'stone', tint: '#e2dccd' },
-  hagiaSophia: { fit: 'max', size: 56, col: 'box', shrink: 0.75, tint: '#e8b08a', detail: 'stone' },
+  fairyChimneys: { file: 'fairyChimney', fit: 'height', copies: [[-14, -10, 24, 0], [12, -12, 19, 1.2], [-4, 12, 28, 2.3], [17, 14, 16, 4]], col: 'each', shrink: 0.5, tint: '#ecd9ba', detail: 'concrete' },
   galataTower: { fit: 'height', size: 52, col: 'cyl', shrink: 0.85 },
+  goreme: { fit: 'max', size: 56, col: 'box', shrink: 0.8, tint: '#e9d3ad', detail: 'concrete' },
+  hagiaSophia: { fit: 'max', size: 58, col: 'box', shrink: 0.75 },
+  loveValley: { file: 'fairyChimney', fit: 'height', copies: [[-16, 0, 34, 0.5], [0, -15, 30, 2], [15, 8, 37, 3.5], [-3, 16, 26, 5]], col: 'each', shrink: 0.45, tint: '#f0e0c6', detail: 'concrete' },
+  maidensTower: { fit: 'max', size: 14, y: 2.2, col: 'keep', base: 'maidenIsland' },
+  maracana: { fit: 'max', size: 60, col: 'none' },
+  meijiTorii: { file: 'torii', fit: 'max', size: 21, z: 10, ry: PI / 2, col: 'keep', base: 'meijiShrine' },
   notreDame: { fit: 'max', size: 58, col: 'box', shrink: 0.8 },
   operaHouse: { fit: 'max', size: 60, y: -4, col: 'box', shrink: 0.85 },
-  reichstag: { fit: 'max', size: 56, col: 'box', shrink: 0.85 },
-  maidensTower: { fit: 'max', size: 14, y: 2.2, col: 'keep', base: 'maidenIsland' },
+  paintedLadies: { fit: 'width', size: 50, col: 'box', shrink: 0.85 },
+  panathenaic: { fit: 'max', size: 58, col: 'none' },
   parthenon: { fit: 'max', size: 40, y: 5, col: 'keep', base: 'acropolis', detail: 'marble', tint: '#f3ead8' },
+  pyramids: { file: 'pyramid', fit: 'max', size: 128, col: 'box', shrink: 0.45 },
+  reichstag: { fit: 'max', size: 56, col: 'box', shrink: 0.85 },
+  rijksmuseum: { fit: 'max', size: 58, col: 'box', shrink: 0.9 },
+  sagrada: { fit: 'max', size: 56, col: 'box', shrink: 0.75 },
   sensoji: { fit: 'height', size: 36, col: 'keep', base: 'kaminarimon' },
+  sphinx: { fit: 'max', size: 52, col: 'box', shrink: 0.6 },
   statueLiberty: { fit: 'height', size: 46, y: 4, col: 'keep', base: 'libertyFort' },
-  meijiTorii: { file: 'torii', fit: 'max', size: 21, z: 10, ry: PI / 2, col: 'keep', base: 'meijiShrine' },
+  stPeters: { fit: 'max', size: 60, col: 'none' },
+  tajMahal: { fit: 'max', size: 120, col: 'box', shrink: 0.55, tint: '#f6f2ea', detail: 'marble' },
+  tokyoTower: { fit: 'height', size: 100, col: 'legs' },
+  towerBridge: { fit: 'max', size: 58, col: 'keep' },
+  transamerica: { fit: 'height', size: 100, col: 'box', shrink: 0.7, tint: '#ece8df', detail: 'concrete' },
   tvTower: { fit: 'height', size: 128, col: 'cyl', shrink: 0.35, glow: '#ffd994', detail: 'concrete' },
   windmills: { file: 'windmill', copies: [[-14, -6, 21, 0.3], [2, -12, 19, -0.2], [16, -4, 17, 0.5]], col: 'keep', base: 'polder' },
 }
@@ -64,6 +86,8 @@ function fitted(gltf, cfg, size = cfg.size, night = false) {
   const tint = cfg.tint ? new THREE.Color(cfg.tint) : null
   obj.traverse((m) => {
     if (!m.isMesh) return
+    // Decimated scans ship without normals to save space; smooth normals look far better than flat facets.
+    if (!m.geometry.attributes.normal) m.geometry.computeVertexNormals()
     m.castShadow = true
     m.receiveShadow = true
     const mats = Array.isArray(m.material) ? m.material : [m.material]
@@ -87,12 +111,13 @@ function fitted(gltf, cfg, size = cfg.size, night = false) {
 export async function buildModelLandmark(id, night) {
   const cfg = MODELS[id]
   if (!cfg) return null
-  const gltf = await loadModel(cfg.file ?? id)
+  const files = cfg.files ?? [cfg.file ?? id]
+  const gltfs = await Promise.all(files.map(loadModel))
   const group = new THREE.Group()
   const mixers = []
   const copies = cfg.copies ?? [[cfg.x ?? 0, cfg.z ?? 0, cfg.size, cfg.ry ?? 0]]
-  for (const [x, z, size, ry] of copies) {
-    const { holder, mixer, clips } = fitted(gltf, cfg, size, night)
+  for (const [x, z, size, ry, fi] of copies) {
+    const { holder, mixer, clips } = fitted(gltfs[fi ?? 0], cfg, size, night)
     holder.position.set(x, cfg.y ?? 0, z)
     holder.rotation.y = ry ?? 0
     group.add(holder)

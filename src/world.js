@@ -479,10 +479,19 @@ export class World {
         this.physics.removeBody(b)
         this.bodies.splice(this.bodies.indexOf(b), 1)
       }
+      const k = cfg.shrink ?? 0.9
+      if (cfg.col === 'each') {
+        for (const holder of group.children) {
+          if (holder.isMesh || !holder.children.length) continue
+          const b = new THREE.Box3().setFromObject(holder)
+          const sz = b.getSize(new THREE.Vector3())
+          const cc = b.getCenter(new THREE.Vector3())
+          this.staticCyl(cc.x, cc.z, (Math.max(sz.x, sz.z) / 2) * k, Math.min(sz.y, 60))
+        }
+      }
       const box = new THREE.Box3().setFromObject(group.children[0])
       const size = box.getSize(new THREE.Vector3())
       const c = box.getCenter(new THREE.Vector3())
-      const k = cfg.shrink ?? 0.9
       const h = Math.min(size.y, 60)
       if (cfg.col === 'box') this.staticBox(c.x, 0, c.z, size.x * k, h, size.z * k)
       else if (cfg.col === 'cyl') this.staticCyl(c.x, c.z, (Math.max(size.x, size.z) / 2) * k, h)
