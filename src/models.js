@@ -19,7 +19,7 @@ export const MODELS = {
   agraFort: { fit: 'max', size: 58, col: 'box', shrink: 0.9 },
   arcTriomphe: { fit: 'width', size: 31, col: 'keep', detail: 'stone', tint: '#efe3c8' },
   bigBen: { fit: 'height', size: 72, col: 'box', shrink: 0.9 },
-  blueMosque: { fit: 'max', size: 58, col: 'box', shrink: 0.75, tint: '#d9d4cb', detail: 'stone' },
+  blueMosque: { fit: 'max', size: 58, col: 'box', shrink: 0.75, tint: '#cdc6ba', detail: 'stone' },
   brandenburg: { fit: 'width', size: 56, col: 'keep' },
   burjAlArab: { fit: 'height', size: 64, y: 2, col: 'keep', base: 'island' },
   burjKhalifa: { fit: 'height', size: 180, col: 'box', shrink: 0.7 },
@@ -29,11 +29,11 @@ export const MODELS = {
   colosseum: { fit: 'max', size: 56, col: 'cyl', shrink: 0.92 },
   eiffel: { fit: 'height', size: 98, col: 'legs', tint: '#9c7a5c', glow: '#ffb257' },
   empireState: { fit: 'height', size: 132, col: 'box', shrink: 0.85, glow: '#9fc4ff', detail: 'stone', tint: '#e2dccd' },
-  fairyChimneys: { file: 'fairyChimney', fit: 'height', copies: [[-14, -10, 24, 0], [12, -12, 19, 1.2], [-4, 12, 28, 2.3], [17, 14, 16, 4]], col: 'each', shrink: 0.5, tint: '#ecd9ba', detail: 'concrete' },
+  fairyChimneys: { file: 'fairyChimney', fit: 'height', copies: [[-14, -10, 24, 0], [12, -12, 19, 1.2], [-4, 12, 28, 2.3], [17, 14, 16, 4]], col: 'each', shrink: 0.5, tint: '#d8b98e', detail: 'concrete' },
   galataTower: { fit: 'height', size: 52, col: 'cyl', shrink: 0.85 },
-  goreme: { fit: 'max', size: 56, col: 'box', shrink: 0.8, tint: '#e9d3ad', detail: 'concrete' },
+  goreme: { fit: 'max', size: 56, col: 'box', shrink: 0.8, tint: '#d9ba8f', detail: 'concrete' },
   hagiaSophia: { fit: 'max', size: 58, col: 'box', shrink: 0.75 },
-  loveValley: { file: 'fairyChimney', fit: 'height', copies: [[-16, 0, 34, 0.5], [0, -15, 30, 2], [15, 8, 37, 3.5], [-3, 16, 26, 5]], col: 'each', shrink: 0.45, tint: '#f0e0c6', detail: 'concrete' },
+  loveValley: { file: 'fairyChimney', fit: 'height', copies: [[-16, 0, 34, 0.5], [0, -15, 30, 2], [15, 8, 37, 3.5], [-3, 16, 26, 5]], col: 'each', shrink: 0.45, tint: '#e0c49c', detail: 'concrete' },
   maidensTower: { fit: 'max', size: 14, y: 2.2, col: 'keep', base: 'maidenIsland' },
   maracana: { fit: 'max', size: 60, col: 'none' },
   meijiTorii: { file: 'torii', fit: 'max', size: 21, z: 10, ry: PI / 2, col: 'keep', base: 'meijiShrine' },
@@ -42,12 +42,12 @@ export const MODELS = {
   paintedLadies: { fit: 'width', size: 50, col: 'box', shrink: 0.85 },
   panathenaic: { fit: 'max', size: 58, col: 'none' },
   parthenon: { fit: 'max', size: 40, y: 5, col: 'keep', base: 'acropolis', detail: 'marble', tint: '#f3ead8' },
-  pyramids: { file: 'pyramid', fit: 'max', size: 128, col: 'box', shrink: 0.45 },
+  pyramids: { file: 'pyramid', fit: 'max', size: 128, bright: 1.7, col: 'box', shrink: 0.45 },
   reichstag: { fit: 'max', size: 56, col: 'box', shrink: 0.85 },
   rijksmuseum: { fit: 'max', size: 58, col: 'box', shrink: 0.9 },
   sagrada: { fit: 'max', size: 56, col: 'box', shrink: 0.75 },
   sensoji: { fit: 'height', size: 36, col: 'keep', base: 'kaminarimon' },
-  sphinx: { fit: 'max', size: 52, col: 'box', shrink: 0.6 },
+  sphinx: { fit: 'max', size: 52, bright: 1.8, col: 'box', shrink: 0.6 },
   statueLiberty: { fit: 'height', size: 46, y: 4, col: 'keep', base: 'libertyFort' },
   stPeters: { fit: 'max', size: 60, col: 'none' },
   tajMahal: { fit: 'max', size: 120, col: 'box', shrink: 0.55, tint: '#f6f2ea', detail: 'marble' },
@@ -94,6 +94,7 @@ function fitted(gltf, cfg, size = cfg.size, night = false) {
     const out = mats.map((src) => {
       const mm = src.clone()
       if (tint) mm.color.multiply(tint)
+      if (cfg.bright) mm.color.multiplyScalar(cfg.bright)
       if ('metalness' in mm) mm.metalness = Math.min(mm.metalness, 0.3)
       if (cfg.detail && !mm.map) addDetail(mm, cfg.detail)
       if (night) {
