@@ -21,13 +21,13 @@ export const MODELS = {
   bigBen: { fit: 'height', size: 72, col: 'box', shrink: 0.9 },
   blueMosque: { fit: 'max', size: 58, col: 'box', shrink: 0.75, tint: '#cdc6ba', detail: 'stone' },
   brandenburg: { fit: 'width', size: 56, col: 'keep' },
-  burjAlArab: { fit: 'height', size: 64, y: 2, col: 'keep', base: 'island' },
-  burjKhalifa: { fit: 'height', size: 180, col: 'box', shrink: 0.7 },
+  burjAlArab: { fit: 'height', size: 64, metal: 0.3, y: 2, col: 'keep', base: 'island' },
+  burjKhalifa: { fit: 'height', size: 180, metal: 0.3, col: 'box', shrink: 0.7 },
   canalHouses: { files: ['canalHouse1', 'canalHouse2', 'canalHouse3'], fit: 'height', copies: [[-12.4, -0.3, 15, 0], [1.85, 1.15, 17, 0, 1], [14.4, 4.25, 14, 0, 2]], col: 'each', shrink: 0.8, base: 'canal' },
   christRedeemer: { fit: 'height', size: 19, y: 30, col: 'keep', base: 'corcovado', detail: 'marble' },
   citadelMosque: { fit: 'max', size: 54, col: 'box', shrink: 0.75 },
   colosseum: { fit: 'max', size: 56, col: 'cyl', shrink: 0.92 },
-  eiffel: { fit: 'height', size: 98, col: 'legs', tint: '#9c7a5c', glow: '#ffb257' },
+  eiffel: { fit: 'height', size: 98, metal: 0.3, col: 'legs', tint: '#9c7a5c', glow: '#ffb257' },
   empireState: { fit: 'height', size: 132, col: 'box', shrink: 0.85, glow: '#9fc4ff', detail: 'stone', tint: '#e2dccd' },
   fairyChimneys: { file: 'fairyChimney', fit: 'height', copies: [[-14, -10, 24, 0], [12, -12, 19, 1.2], [-4, 12, 28, 2.3], [17, 14, 16, 4]], col: 'each', shrink: 0.5, tint: '#d8b98e', detail: 'concrete' },
   galataTower: { fit: 'height', size: 52, col: 'cyl', shrink: 0.85 },
@@ -50,9 +50,9 @@ export const MODELS = {
   sphinx: { fit: 'max', size: 52, bright: 1.8, col: 'box', shrink: 0.6 },
   statueLiberty: { fit: 'height', size: 46, y: 4, col: 'keep', base: 'libertyFort' },
   tajMahal: { fit: 'max', size: 120, col: 'box', shrink: 0.55, tint: '#f6f2ea', detail: 'marble' },
-  tokyoTower: { fit: 'height', size: 100, col: 'legs' },
+  tokyoTower: { fit: 'height', size: 100, metal: 0.3, col: 'legs' },
   towerBridge: { fit: 'max', size: 58, col: 'keep' },
-  transamerica: { fit: 'height', size: 100, col: 'box', shrink: 0.7, tint: '#ece8df', detail: 'concrete' },
+  transamerica: { fit: 'height', size: 100, metal: 0.3, col: 'box', shrink: 0.7, tint: '#ece8df', detail: 'concrete' },
   tvTower: { fit: 'height', size: 128, col: 'cyl', shrink: 0.35, glow: '#ffd994', detail: 'concrete' },
   windmills: { file: 'windmill', copies: [[-14, -6, 21, 0.3], [2, -12, 19, -0.2], [16, -4, 17, 0.5]], col: 'keep', base: 'polder' },
 }
@@ -94,7 +94,9 @@ function fitted(gltf, cfg, size = cfg.size, night = false) {
       const mm = src.clone()
       if (tint) mm.color.multiply(tint)
       if (cfg.bright) mm.color.multiplyScalar(cfg.bright)
-      if ('metalness' in mm) mm.metalness = Math.min(mm.metalness, 0.3)
+      // Many scans are exported with metallicFactor 1, which turns stone dark and grey under the sky light.
+      if ('metalness' in mm) mm.metalness = Math.min(mm.metalness, cfg.metal ?? 0.05)
+      if ('roughness' in mm && !cfg.metal) mm.roughness = Math.max(mm.roughness, 0.75)
       if (cfg.detail && !mm.map) addDetail(mm, cfg.detail)
       if (night) {
         mm.emissive = new THREE.Color(cfg.glow ?? '#ffe2b0').multiplyScalar(0.35)
