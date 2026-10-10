@@ -79,13 +79,13 @@ First release of CityCars: World Tour!
 
 ## Screenshot captions (used on the store screenshots)
 
-1. Drive the world's most famous cities (Paris, Eiffel Tower)
-2. Discover real landmarks (Istanbul, Galata Tower)
-3. From Big Ben… (London)
-4. …to the Statue of Liberty (New York)
-5. Explore ancient wonders (Rome, Colosseum)
-6. Reach for the sky (Dubai, Burj Khalifa)
-7. 17 cities to unlock (Rio, Christ the Redeemer)
+1. Drive the world's most famous cities (Istanbul, Hagia Sophia)
+2. Discover real landmarks (Cairo, Great Pyramid of Giza)
+3. Cruise past the fairy chimneys (Cappadocia)
+4. From the Eiffel Tower… (Paris)
+5. …to the Taj Mahal (Agra)
+6. Cross Tower Bridge (London)
+7. 17 cities to unlock (Tokyo, Tokyo Tower)
 8. Jump, crash & blow things up! (explosion)
 9. Your world tour awaits (city map)
 
