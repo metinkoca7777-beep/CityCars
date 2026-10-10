@@ -40,7 +40,6 @@ The following landmark models are used under the **Creative Commons Attribution 
 | sensoji | japanese shrine - pagoda | LeviWalker1999 | https://sketchfab.com/3d-models/7be6145f685f47a3a61ee3f19298cadd |
 | sphinx | The Great Sphinx of Giza | wattinstitution | https://sketchfab.com/3d-models/c126509af31142a9a0d116e264e7b629 |
 | statueLiberty | Souvenir Statue of Liberty model | jerryfisher | https://sketchfab.com/3d-models/a6eed066d5044ff6bd1d1ba1954a092e |
-| stPeters | Vatican and St. Peter Basilica | gnaz | https://sketchfab.com/3d-models/1d936fe09cc64376802b196157a73d16 |
 | tajMahal | TAJ MAHAL | mishrau60 | https://sketchfab.com/3d-models/c8eb2e89098746898b94f0b556ecdefe |
 | tokyoTower | Tokyo Tower | Void.com | https://sketchfab.com/3d-models/4f667743965e4260b451ad38efcc3712 |
 | torii | Japanese Torii Gate | sahirvirmani | https://sketchfab.com/3d-models/2027a248de1b4b70985ff97e708fb50d |

@@ -642,6 +642,39 @@ export const LANDMARKS = {
     k.sphere(1.2, '#ffffff', 0, 11, -8.5)
     k.cyl(1.2, 1.6, 5, '#ffffff', 0, 4.8, -8.5, { seg: 8 })
     k.box(41, 3, 9, '#ddd3bd', 0, 20, -14)
+    // Palazzo Poli: windows on every side so the block reads as a palace, not a box.
+    const win = '#5d5546'
+    const frame = '#f6f0e3'
+    for (let fl = 0; fl < 3; fl++) {
+      const y = 3.2 + fl * 5.6
+      for (let i = 0; i < 12; i++) {
+        const x = -18 + i * 3.27
+        if (Math.abs(x) < 6) continue
+        k.box(1.9, 2.8, 0.3, frame, x, y - 0.2, -9.85)
+        k.box(1.4, 2.3, 0.4, win, x, y, -9.8)
+        k.box(1.9, 2.8, 0.3, frame, x, y - 0.2, -18.15)
+        k.box(1.4, 2.3, 0.4, win, x, y, -18.2)
+      }
+      for (let i = 0; i < 2; i++) for (const sx of [-1, 1]) {
+        k.box(0.3, 2.8, 1.9, frame, sx * 20.15, y - 0.2, -16 + i * 4)
+        k.box(0.4, 2.3, 1.4, win, sx * 20.2, y, -16 + i * 4)
+      }
+    }
+    k.box(42, 0.6, 9.6, '#d2c7ae', 0, 1.4, -14)
+    k.box(42, 0.6, 9.6, '#d2c7ae', 0, 7.6, -14)
+    // Triumphal-arch centrepiece and the attic statues.
+    k.box(16, 23, 2, '#f1ebdd', 0, 0, -9.2)
+    k.box(6.5, 11, 1, '#a99c82', 0, 3, -8.3)
+    k.box(18, 2.5, 2.4, '#e7dfcd', 0, 23, -9.2)
+    for (let i = 0; i < 4; i++) k.cyl(0.45, 0.45, 2.6, '#f8f4ea', -6 + i * 4, 25.5, -9.2, { seg: 8 })
+    k.box(6, 3, 1.4, '#e7dfcd', 0, 25.5, -9.2)
+    for (const sx of [-1, 1]) {
+      k.cyl(0.9, 1.1, 4, '#f8f4ea', sx * 5.5, 5, -7.9, { seg: 8 })
+      k.sphere(0.8, '#f8f4ea', sx * 5.5, 9.6, -7.9)
+      k.mesh(new THREE.DodecahedronGeometry(1.4), '#f3eee3', sx * 4.5, 1.5, -3)
+      k.cyl(0.5, 0.7, 2.6, '#f3eee3', sx * 4.5, 2.4, -2.2, { seg: 6 })
+    }
+    k.sphere(1.6, '#f3eee3', 0, 1.6, -4.5)
     const rng = mulberry32(5)
     for (let i = 0; i < 12; i++) k.mesh(new THREE.DodecahedronGeometry(1.5 + rng() * 1.5), '#d6ceb9', -12 + rng() * 24, 0.6, -7.5 + rng() * 2)
     k.cyl(14.5, 14.5, 0.8, '#d7cdb6', 0, 0, -6, { ts: -PI / 2, tl: PI, seg: 24 })

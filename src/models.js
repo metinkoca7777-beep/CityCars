@@ -23,7 +23,7 @@ export const MODELS = {
   brandenburg: { fit: 'width', size: 56, col: 'keep' },
   burjAlArab: { fit: 'height', size: 64, y: 2, col: 'keep', base: 'island' },
   burjKhalifa: { fit: 'height', size: 180, col: 'box', shrink: 0.7 },
-  canalHouses: { files: ['canalHouse1', 'canalHouse2', 'canalHouse3'], fit: 'height', copies: [[-18, 0, 17, 0], [0, 0, 19, 0, 1], [18, 0, 18, 0, 2]], col: 'each', shrink: 0.8 },
+  canalHouses: { files: ['canalHouse1', 'canalHouse2', 'canalHouse3'], fit: 'height', copies: [[-12.4, -0.3, 15, 0], [1.85, 1.15, 17, 0, 1], [14.4, 4.25, 14, 0, 2]], col: 'each', shrink: 0.8, base: 'canal' },
   christRedeemer: { fit: 'height', size: 19, y: 30, col: 'keep', base: 'corcovado', detail: 'marble' },
   citadelMosque: { fit: 'max', size: 54, col: 'box', shrink: 0.75 },
   colosseum: { fit: 'max', size: 56, col: 'cyl', shrink: 0.92 },
@@ -39,7 +39,7 @@ export const MODELS = {
   meijiTorii: { file: 'torii', fit: 'max', size: 21, z: 10, ry: PI / 2, col: 'keep', base: 'meijiShrine' },
   notreDame: { fit: 'max', size: 58, col: 'box', shrink: 0.8 },
   operaHouse: { fit: 'max', size: 60, y: -4, col: 'box', shrink: 0.85 },
-  paintedLadies: { fit: 'width', size: 50, col: 'box', shrink: 0.85 },
+  paintedLadies: { fit: 'width', size: 50, bright: 1.3, col: 'box', shrink: 0.85 },
   panathenaic: { fit: 'max', size: 58, col: 'none' },
   parthenon: { fit: 'max', size: 40, y: 5, col: 'keep', base: 'acropolis', detail: 'marble', tint: '#f3ead8' },
   pyramids: { file: 'pyramid', fit: 'max', size: 128, bright: 1.7, col: 'box', shrink: 0.45 },
@@ -49,7 +49,6 @@ export const MODELS = {
   sensoji: { fit: 'height', size: 36, col: 'keep', base: 'kaminarimon' },
   sphinx: { fit: 'max', size: 52, bright: 1.8, col: 'box', shrink: 0.6 },
   statueLiberty: { fit: 'height', size: 46, y: 4, col: 'keep', base: 'libertyFort' },
-  stPeters: { fit: 'max', size: 60, col: 'none' },
   tajMahal: { fit: 'max', size: 120, col: 'box', shrink: 0.55, tint: '#f6f2ea', detail: 'marble' },
   tokyoTower: { fit: 'height', size: 100, col: 'legs' },
   towerBridge: { fit: 'max', size: 58, col: 'keep' },
@@ -252,6 +251,11 @@ const BASES = {
     k.box(16, 5, 10, '#8a5a3a', 0, 1, -12)
     k.box(18, 1, 12, '#cfc6b4', 0, 0, -12)
     k.prism(22, 6, 14, '#3f6b5a', 0, 6, -12, { ry: PI / 2 })
+  },
+  canal(k) {
+    k.box(60, 0.12, 8, water(), 0, 0.02, 17)
+    for (const sz of [-1, 1]) k.box(60, 0.5, 0.8, '#8d8476', 0, 0, 17 + sz * 4.4)
+    k.box(6, 0.6, 9.6, '#9a8f7e', -4, 0, 17)
   },
   polder(k) {
     k.box(60, 0.15, 7, water(), 0, 0, 10)

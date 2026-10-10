@@ -171,11 +171,6 @@ export const MODEL_CREDITS = [
   "url": "https://sketchfab.com/3d-models/a6eed066d5044ff6bd1d1ba1954a092e"
  },
  {
-  "title": "Vatican and St. Peter Basilica",
-  "author": "gnaz",
-  "url": "https://sketchfab.com/3d-models/1d936fe09cc64376802b196157a73d16"
- },
- {
   "title": "TAJ MAHAL",
   "author": "mishrau60",
   "url": "https://sketchfab.com/3d-models/c8eb2e89098746898b94f0b556ecdefe"
