@@ -13,7 +13,7 @@ const PI = Math.PI
 // fit: which dimension `size` (metres) applies to — 'height', 'width' (x) or 'max' (largest horizontal side).
 // col: 'keep' = keep the procedural colliders, 'box' | 'cyl' | 'legs' = derive from the model's bounds,
 //      'each' = one cylinder per copy, 'none' = no colliders (flat sites you can drive across).
-// copies: [x, z, size, rotation, fileIndex] — several instances, optionally of different `files`.
+// copies: [x, z, size, rotation, fileIndex, y] — several instances, optionally of different `files`.
 // base: extra procedural parts drawn under/around the model (islands, pedestals...).
 export const MODELS = {
   agraFort: { fit: 'max', size: 58, col: 'box', shrink: 0.9 },
@@ -33,6 +33,7 @@ export const MODELS = {
   galataTower: { fit: 'height', size: 52, col: 'cyl', shrink: 0.85 },
   goreme: { fit: 'max', size: 56, col: 'box', shrink: 0.8, tint: '#cfa070', detail: 'concrete' },
   hagiaSophia: { fit: 'max', size: 58, col: 'box', shrink: 0.75 },
+  uchisar: { file: 'goreme', fit: 'max', copies: [[0, 0, 58, 0], [0, 0, 40, 1.7, 0, 9], [0, 0, 25, 3.6, 0, 19]], col: 'cyl', shrink: 0.75, tint: '#cfa070', detail: 'concrete', base: 'uchisarFlag' },
   loveValley: { file: 'fairyChimney', fit: 'height', copies: [[-16, 0, 34, 0.5], [0, -15, 30, 2], [15, 8, 37, 3.5], [-3, 16, 26, 5]], col: 'each', shrink: 0.45, tint: '#d8ad7a', detail: 'concrete' },
   maidensTower: { fit: 'max', size: 14, y: 2.2, col: 'keep', base: 'maidenIsland' },
   maracana: { fit: 'max', size: 60, col: 'none' },
@@ -118,9 +119,9 @@ export async function buildModelLandmark(id, night) {
   const group = new THREE.Group()
   const mixers = []
   const copies = cfg.copies ?? [[cfg.x ?? 0, cfg.z ?? 0, cfg.size, cfg.ry ?? 0]]
-  for (const [x, z, size, ry, fi] of copies) {
+  for (const [x, z, size, ry, fi, y] of copies) {
     const { holder, mixer, clips } = fitted(gltfs[fi ?? 0], cfg, size, night)
-    holder.position.set(x, cfg.y ?? 0, z)
+    holder.position.set(x, y ?? cfg.y ?? 0, z)
     holder.rotation.y = ry ?? 0
     group.add(holder)
     if (mixer) {
@@ -253,6 +254,10 @@ const BASES = {
     k.box(16, 5, 10, '#8a5a3a', 0, 1, -12)
     k.box(18, 1, 12, '#cfc6b4', 0, 0, -12)
     k.prism(22, 6, 14, '#3f6b5a', 0, 6, -12, { ry: PI / 2 })
+  },
+  uchisarFlag(k) {
+    k.cyl(0.12, 0.12, 7, '#dddddd', 0, 26, 0, { seg: 6 })
+    k.box(4, 2.6, 0.1, '#e30a17', 2, 30, 0)
   },
   canal(k) {
     k.box(60, 0.12, 8, water(), 0, 0.02, 17)
