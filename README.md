@@ -60,7 +60,7 @@ Her yeni sürümde `versionCode`'u artır (`VERSION_CODE` ortam değişkeni ile 
 `ANDROID_KEYSTORE_BASE64` (`base64 -w0 citycars-upload.jks`), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`.
 
 ### 4) Play Console
-- Mağaza metinleri (TR + EN), kategori ve anahtar kelimeler: `store/listing.md`
+- Mağaza metinleri 6 dilde (EN, TR, ES, DE, FR, PT): `store/listings/` · Yayınlama rehberi: `store/YAYINLAMA-REHBERI.md` (Türkçe), `store/PUBLISHING-GUIDE.md` (English)
 - Simge 512×512: `store/icon-512.png` · Öne çıkan grafik: `store/feature-graphic-1024x500.png` · Ekran görüntüleri: `store/screenshots/`
 - "Reklam içeriyor: Evet", Veri güvenliği formunda AdMob'un topladığı verileri (Reklam Kimliği, yaklaşık konum, uygulama etkileşimleri) beyan et.
 - İçerik derecelendirme anketini doldur; hedef kitleyi 13+ seçmek reklam kurallarını basitleştirir (çocuklara yönelik seçersen Aileler politikası ve yalnızca sertifikalı reklam ağları gerekir).

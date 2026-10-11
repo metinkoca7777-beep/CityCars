@@ -2,7 +2,7 @@
 
 ## Türkçe (tr-TR)
 
-**Uygulama adı (30):** CityCars: Dünya Turu Araba Oyunu
+**Uygulama adı (30):** CityCars: Dünya Turu Araba
 
 **Kısa açıklama (80):** İstanbul’dan Tokyo’ya 17 ünlü şehirde sür, turistik yerleri keşfet, altın topla!
 
