@@ -25,10 +25,10 @@ import { MODEL_CREDITS } from './credits.js'
 
 const $ = (s) => document.querySelector(s)
 const PRIVACY_URL = 'https://citycars-xi.vercel.app/privacy.html'
-const DISCOVER_REWARD = 100
-const ALL_DISCOVERED_BONUS = 250
+const DISCOVER_REWARD = 60
+const ALL_DISCOVERED_BONUS = 150
 const FREE_COINS = 150
-const MEDAL_REWARD = { gold: 300, silver: 150, bronze: 80, none: 30 }
+const MEDAL_REWARD = { gold: 200, silver: 100, bronze: 50, none: 20 }
 
 class Game {
   constructor() {
@@ -105,6 +105,8 @@ class Game {
     setTimeout(() => $('#loading').classList.add('hidden'), 600)
     this.showTitle()
     requestAnimationFrame(this.loop)
+    // Mute the game while a full-screen ad covers it (AdMob policy + better UX).
+    Ads.setFullscreenHandler((on) => this.audio.pause(on))
     Ads.initAds().then(() => this.mode === 'menu' && Ads.showBanner())
   }
 
@@ -997,13 +999,14 @@ class Game {
         <div class="screen-head">
           <button class="btn ghost small" id="cBack">← ${t('back')}</button>
           <h2>${t('chooseCity')}</h2>
-          <button class="btn green small" id="cFree">🎬 ${t('freeCoins', { n: FREE_COINS })}</button>
+          ${Ads.adsSupported ? `<button class="btn green small" id="cFree">🎬 ${t('freeCoins', { n: FREE_COINS })}</button>` : ''}
           ${this.coinsBadge()}
         </div>
         <div class="grid">${cards}</div>
       </div>`, true)
     m.querySelector('#cBack').onclick = () => this.showTitle()
-    m.querySelector('#cFree').onclick = () => this.watchForCoins(() => this.showCities())
+    const cFree = m.querySelector('#cFree')
+    if (cFree) cFree.onclick = () => this.watchForCoins(cFree, () => this.showCities())
     m.querySelectorAll('.card').forEach((el) => {
       el.onclick = async () => {
         const c = cityById(el.dataset.id)
@@ -1019,7 +1022,10 @@ class Game {
             return
           }
         }
-        if (c.id !== this.city.id) await this.loadCity(c.id)
+        if (c.id !== this.city.id) {
+          await this.loadCity(c.id)
+          await Ads.maybeInterstitial()
+        }
         this.showCityIntro()
       }
     })
@@ -1073,13 +1079,14 @@ class Game {
         <div class="screen-head">
           <button class="btn ghost small" id="gBack">← ${t('back')}</button>
           <h2>${t('garage')}</h2>
-          <button class="btn green small" id="gFree">🎬 ${t('freeCoins', { n: FREE_COINS })}</button>
+          ${Ads.adsSupported ? `<button class="btn green small" id="gFree">🎬 ${t('freeCoins', { n: FREE_COINS })}</button>` : ''}
           ${this.coinsBadge()}
         </div>
         <div class="grid" style="margin-top:auto;max-height:46vh">${cards}</div>
       </div>`)
     m.querySelector('#gBack').onclick = () => this.showTitle()
-    m.querySelector('#gFree').onclick = () => this.watchForCoins(() => this.showGarage())
+    const gFree = m.querySelector('#gFree')
+    if (gFree) gFree.onclick = () => this.watchForCoins(gFree, () => this.showGarage())
     m.querySelectorAll('.card').forEach((el) => {
       el.onclick = () => {
         const c = CARS.find((x) => x.id === el.dataset.id)
@@ -1103,8 +1110,12 @@ class Game {
     })
   }
 
-  async watchForCoins(after) {
+  async watchForCoins(btn, after) {
+    if (this.adBusy) return
+    this.adBusy = true
+    btn.disabled = true
     const ok = await Ads.showRewarded()
+    this.adBusy = false
     if (ok) {
       this.addCoins(FREE_COINS, true)
       this.audio.buy()
@@ -1231,11 +1242,12 @@ class Game {
         <div>${t('time')}: <b>${formatTime(time)}</b> · ${t('best')}: <b>${formatTime(best)}</b></div>
         <div class="coins-badge" style="font-size:24px"><span class="coin-ico"></span>+${reward}</div>
         <div class="row">
-          <button class="btn green" id="rDouble">🎬 ${t('doubleReward')}</button>
+          ${Ads.adsSupported ? `<button class="btn green" id="rDouble">🎬 ${t('doubleReward')}</button>` : ''}
           <button class="btn" id="rContinue">${t('continue')}</button>
         </div>
       </div>`, true)
-    m.querySelector('#rDouble').onclick = async (e) => {
+    const rDouble = m.querySelector('#rDouble')
+    if (rDouble) rDouble.onclick = async (e) => {
       e.target.disabled = true
       const ok = await Ads.showRewarded()
       if (ok) {
@@ -1245,7 +1257,10 @@ class Game {
       } else this.toast(t('adUnavailable'))
       this.resume()
     }
-    m.querySelector('#rContinue').onclick = () => this.resume()
+    m.querySelector('#rContinue').onclick = async () => {
+      await Ads.maybeInterstitial()
+      this.resume()
+    }
   }
 }
 

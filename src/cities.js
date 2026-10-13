@@ -22,7 +22,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'cappadocia', flag: '🇹🇷', price: 300,
+    id: 'cappadocia', flag: '🇹🇷', price: 500,
     name: { en: 'Cappadocia', tr: 'Kapadokya' },
     time: 'day', sky: ['#5fa8e8', '#ffe2b8'], fog: '#f0d9b5', sun: '#fff1d6', sunPos: [0.6, 0.7, 0.4],
     ground: '#d6bf94', style: 'rural', palette: ['#e6d2ae', '#dcc49c', '#ead9ba', '#cfb48a'], roof: '#c7a57a', heights: [4, 8],
@@ -37,7 +37,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'paris', flag: '🇫🇷', price: 400,
+    id: 'paris', flag: '🇫🇷', price: 700,
     name: { en: 'Paris', tr: 'Paris' },
     time: 'sunset', sky: ['#4b5fa8', '#ffb8a0'], fog: '#e8b6a8', sun: '#ffcf9e', sunPos: [0.8, 0.35, -0.5],
     ground: '#7fa05a', style: 'european', palette: ['#efe6d2', '#e6dcc4', '#f2ecdf', '#dcd0b6'], roof: '#5d6872', heights: [14, 22],
@@ -52,7 +52,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'london', flag: '🇬🇧', price: 500,
+    id: 'london', flag: '🇬🇧', price: 900,
     name: { en: 'London', tr: 'Londra' },
     time: 'day', sky: ['#7d9cc4', '#dfe6ee'], fog: '#cdd6df', sun: '#fff4e0', sunPos: [0.4, 0.6, 0.6],
     ground: '#6f9a55', style: 'european', palette: ['#b8664a', '#c9b48f', '#a85a44', '#e8e0d0', '#8a4a3a'], roof: '#4c5a63', heights: [10, 24],
@@ -66,7 +66,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'newyork', flag: '🇺🇸', price: 600,
+    id: 'newyork', flag: '🇺🇸', price: 1100,
     name: { en: 'New York', tr: 'New York' },
     time: 'night', sky: ['#05081a', '#2a2350'], fog: '#1c1838', sun: '#9fb3ff', sunPos: [-0.3, 0.8, 0.4],
     ground: '#3f5a3a', style: 'modern', palette: ['#8a8f99', '#a9a294', '#6f7480', '#b8b0a0', '#5d6470'], roof: '#444', heights: [30, 80],
@@ -80,7 +80,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'rome', flag: '🇮🇹', price: 700,
+    id: 'rome', flag: '🇮🇹', price: 1300,
     name: { en: 'Rome', tr: 'Roma' },
     time: 'day', sky: ['#4f9ee8', '#fbe8c8'], fog: '#efdcc0', sun: '#fff0d0', sunPos: [0.5, 0.75, 0.3],
     ground: '#8aa05e', style: 'european', palette: ['#e8b77a', '#d98f5c', '#f0d4a4', '#c97a4a', '#efe0c0'], roof: '#b5523b', heights: [10, 18],
@@ -94,7 +94,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'athens', flag: '🇬🇷', price: 700,
+    id: 'athens', flag: '🇬🇷', price: 1400,
     name: { en: 'Athens', tr: 'Atina' },
     time: 'day', sky: ['#3f93e6', '#e8f2fb'], fog: '#dce8f2', sun: '#ffffff', sunPos: [-0.4, 0.8, 0.4],
     ground: '#b9a774', style: 'oriental', palette: ['#f4f1ea', '#ece4d4', '#f7f3ec', '#e2d6c0'], roof: '#c96a4a', heights: [6, 14],
@@ -108,7 +108,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'tokyo', flag: '🇯🇵', price: 800,
+    id: 'tokyo', flag: '🇯🇵', price: 1600,
     name: { en: 'Tokyo', tr: 'Tokyo' },
     time: 'night', sky: ['#0a0620', '#3a1d5a'], fog: '#25163f', sun: '#b8a0ff', sunPos: [0.3, 0.8, -0.4],
     ground: '#405a3f', style: 'modern', palette: ['#d9dde3', '#a7b0bb', '#e6e1d8', '#8f99a6', '#c4c9d0'], roof: '#333', heights: [16, 50], neon: true,
@@ -122,7 +122,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'dubai', flag: '🇦🇪', price: 900,
+    id: 'dubai', flag: '🇦🇪', price: 1800,
     name: { en: 'Dubai', tr: 'Dubai' },
     time: 'day', sky: ['#4aa3e0', '#f7e4c0'], fog: '#efdcb8', sun: '#fff3d8', sunPos: [0.2, 0.85, 0.5],
     ground: '#dcc28e', style: 'modern', palette: ['#dfe6ea', '#c4d2db', '#e8e1d2', '#9fb6c6', '#f0ece4'], roof: '#ccc', heights: [24, 70],
@@ -136,7 +136,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'cairo', flag: '🇪🇬', price: 900,
+    id: 'cairo', flag: '🇪🇬', price: 1900,
     name: { en: 'Cairo', tr: 'Kahire' },
     time: 'sunset', sky: ['#5a4a8a', '#ffb067'], fog: '#e8a870', sun: '#ffb070', sunPos: [-0.8, 0.3, 0.4],
     ground: '#d6b77e', style: 'desert', palette: ['#e2c89a', '#d6b884', '#ead8b4', '#c9a874'], roof: '#c9a874', heights: [6, 16],
@@ -150,7 +150,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'rio', flag: '🇧🇷', price: 1000,
+    id: 'rio', flag: '🇧🇷', price: 2100,
     name: { en: 'Rio de Janeiro', tr: 'Rio de Janeiro' },
     time: 'day', sky: ['#2f9be8', '#d8f2ff'], fog: '#cfeaf7', sun: '#fffbe8', sunPos: [0.5, 0.8, -0.2],
     ground: '#6fae4e', style: 'latin', palette: ['#f2d16b', '#7fc6e8', '#f29a7a', '#a8e0a0', '#f4f0e6', '#e86a6a'], roof: '#c96a4a', heights: [8, 30],
@@ -164,7 +164,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'sydney', flag: '🇦🇺', price: 1100,
+    id: 'sydney', flag: '🇦🇺', price: 2300,
     name: { en: 'Sydney', tr: 'Sidney' },
     time: 'sunset', sky: ['#2c4f9a', '#ff9e7a'], fog: '#d99a88', sun: '#ffb28a', sunPos: [0.8, 0.3, 0.3],
     ground: '#6e9a4c', style: 'modern', palette: ['#e8e6e0', '#c9d3da', '#d9cbb4', '#a7b6c2'], roof: '#555', heights: [16, 50],
@@ -178,7 +178,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'barcelona', flag: '🇪🇸', price: 1100,
+    id: 'barcelona', flag: '🇪🇸', price: 2400,
     name: { en: 'Barcelona', tr: 'Barselona' },
     time: 'day', sky: ['#3b9ae6', '#fff0d0'], fog: '#f0e2c8', sun: '#fff2d0', sunPos: [-0.5, 0.7, 0.4],
     ground: '#94a65e', style: 'european', palette: ['#f2dcb8', '#e8c49a', '#f4ece0', '#e0a87a'], roof: '#b5523b', heights: [14, 24],
@@ -192,7 +192,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'agra', flag: '🇮🇳', price: 1200,
+    id: 'agra', flag: '🇮🇳', price: 2600,
     name: { en: 'Agra', tr: 'Agra' },
     time: 'sunset', sky: ['#6a5aa8', '#ffc29a'], fog: '#f0b8a0', sun: '#ffc39a', sunPos: [0.7, 0.3, -0.6],
     ground: '#8aa05a', style: 'oriental', palette: ['#e8c9a0', '#d99a6a', '#f2dcc0', '#c9785a', '#f0e6d4'], roof: '#a8473a', heights: [6, 14],
@@ -205,7 +205,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'sanfrancisco', flag: '🇺🇸', price: 1300,
+    id: 'sanfrancisco', flag: '🇺🇸', price: 2800,
     name: { en: 'San Francisco', tr: 'San Francisco' },
     time: 'day', sky: ['#5f9fdb', '#e8eef2'], fog: '#d8e0e6', sun: '#fff7e8', sunPos: [-0.5, 0.65, 0.5],
     ground: '#6d9a4e', style: 'latin', palette: ['#f2b6c6', '#a8d8e8', '#f6e3a1', '#b8e0b0', '#e8e4dc'], roof: '#5a4e5c', heights: [10, 40],
@@ -219,7 +219,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'berlin', flag: '🇩🇪', price: 1300,
+    id: 'berlin', flag: '🇩🇪', price: 2900,
     name: { en: 'Berlin', tr: 'Berlin' },
     time: 'night', sky: ['#0b1028', '#3a3460'], fog: '#2a2846', sun: '#b0c0ff', sunPos: [0.4, 0.8, 0.3],
     ground: '#4f6a46', style: 'european', palette: ['#c9c2b4', '#e0d8c8', '#b8afa0', '#d8cbb0'], roof: '#4a4f55', heights: [14, 26],
@@ -233,7 +233,7 @@ export const CITIES = [
     ],
   },
   {
-    id: 'amsterdam', flag: '🇳🇱', price: 1400,
+    id: 'amsterdam', flag: '🇳🇱', price: 3000,
     name: { en: 'Amsterdam', tr: 'Amsterdam' },
     time: 'day', sky: ['#6fa6d8', '#eef3f6'], fog: '#dde6ec', sun: '#fff6e6', sunPos: [0.3, 0.6, 0.7],
     ground: '#6fa44e', style: 'european', palette: ['#6b3a2e', '#8b5a3c', '#a8643f', '#4a3a32', '#e8e0d0'], roof: '#3a3a3a', heights: [10, 18],

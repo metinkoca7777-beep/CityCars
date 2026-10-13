@@ -1,0 +1,42 @@
+<en-US>
+First release of CityCars: World Tour!
+• 17 cities and 50+ famous landmarks, many with real 3D scans
+• Stunt ramps, explosive barrels and tour races
+• 9 cars to unlock, daily rewards and missions
+• Music for every city, in 6 languages
+</en-US>
+<tr-TR>
+CityCars: Dünya Turu'nun ilk sürümü!
+• 17 şehir ve 50+ ünlü turistik yer, birçoğu gerçek 3D taramalarla
+• Rampalar, patlayan variller ve tur yarışları
+• Açılacak 9 araba, günlük ödüller ve görevler
+• Her şehre özel müzik, 6 dil
+</tr-TR>
+<es-ES>
+¡Primera versión de CityCars: World Tour!
+• 17 ciudades y más de 50 monumentos, muchos con escaneos 3D reales
+• Rampas, barriles explosivos y carreras de tour
+• 9 coches para desbloquear, recompensas diarias y misiones
+• Música para cada ciudad, en 6 idiomas
+</es-ES>
+<de-DE>
+Erste Version von CityCars: World Tour!
+• 17 Städte und über 50 Sehenswürdigkeiten, viele als echte 3D-Scans
+• Stuntrampen, explosive Fässer und Tour-Rennen
+• 9 Autos zum Freischalten, tägliche Belohnungen und Missionen
+• Musik für jede Stadt, in 6 Sprachen
+</de-DE>
+<fr-FR>
+Première version de CityCars: World Tour !
+• 17 villes et plus de 50 monuments, dont beaucoup en vrais scans 3D
+• Tremplins, barils explosifs et courses du tour
+• 9 voitures à débloquer, récompenses quotidiennes et missions
+• Une musique pour chaque ville, en 6 langues
+</fr-FR>
+<pt-BR>
+Primeira versão de CityCars: World Tour!
+• 17 cidades e mais de 50 pontos turísticos, muitos com escaneamentos 3D reais
+• Rampas, barris explosivos e corridas do tour
+• 9 carros para desbloquear, recompensas diárias e missões
+• Música para cada cidade, em 6 idiomas
+</pt-BR>
